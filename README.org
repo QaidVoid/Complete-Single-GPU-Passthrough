@@ -1,45 +1,45 @@
 * Set up IOMMU
 ** Enable IOMMU
-***** Load /etc/default/grub and append "intel_iommu=on" or "amd_iommu=on" to GRUB_CMDLINE_LINUX_DEFAULT. Also, "iommu=pt".
-***** Update grub configuration.
+**** Load /etc/default/grub and append "intel_iommu=on" or "amd_iommu=on" to GRUB_CMDLINE_LINUX_DEFAULT. Also, "iommu=pt".
+**** Update grub configuration.
 #+BEGIN_SRC bash
   grub-mkconfig -o /boot/grub/grub.cfg
 #+END_SRC
 ** Verify IOMMU is enabled successfully
-***** You should see "IOMMU enabled" in output.
+**** You should see "IOMMU enabled" in output.
 #+BEGIN_SRC bash
   dmesg | grep -i -e DMAR -e IOMMU | grep enabled
 #+END_SRC
 * Set up VM
 ** Installation
-***** Install the required packages.
+**** Install the required packages.
 #+BEGIN_SRC bash
   sudo pacman -S qemu libvirt edk2-ovmf virt-manager dnsmasq ebtables iptables
 #+END_SRC
 ** Starting services
-***** Enable and start libvirt service
+**** Enable and start libvirt service
 #+BEGIN_SRC bash
   sudo systemctl enable libvirtd
   sudo systemctl start libvirtd
 #+END_SRC
 ** Start default network
-***** This may not be needed. If default network isn't started by default for you, start the network manually.
+**** This may not be needed. If default network isn't started by default for you, start the network manually.
 #+BEGIN_SRC bash
   sudo virsh net-start default
   sudo virsh net-autostart default
 #+END_SRC
 ** Setup Guest OS
-***** Launch virt-manager, and start creating guest. On final step, check "Customize before install".
-***** > In the "Overview" section, set Chipset to "Q35" and firmware to "UEFI".
-***** > In the "CPUs" section, change CPU model to "host-passthrough". You need to type it manually. According to Arch Wiki, this makes sure that the CPU is detected properly. Without it, some applications may complain about your CPU being of an unknown model.
-***** > Set Disk Bus of Storage to "virtio".
-***** > Set NIC Device Model to "virtio".
-***** Now, you can *Begin Installation*. You can continue installing Windows right now or after setting up Passthrough.
+**** Launch virt-manager, and start creating guest. On final step, check "Customize before install".
+**** > In the "Overview" section, set Chipset to "Q35" and firmware to "UEFI".
+**** > In the "CPUs" section, change CPU model to "host-passthrough". You need to type it manually. According to Arch Wiki, this makes sure that the CPU is detected properly. Without it, some applications may complain about your CPU being of an unknown model.
+**** > Set Disk Bus of Storage to "virtio".
+**** > Set NIC Device Model to "virtio".
+**** Now, you can *Begin Installation*. You can continue installing Windows right now or after setting up Passthrough.
 ** Attach PCI devices
-***** Remove devices such as Spice Channel, XQL video adaper, USB tablet, etc.
-***** Click on "Add Hardware" and add PCI devices for GPU and HDMI Audio. For NVIDIA GPU, GPU ROM should be patched. See next section.
+**** Remove devices such as Spice Channel, XQL video adaper, USB tablet, etc.
+**** Click on "Add Hardware" and add PCI devices for GPU and HDMI Audio. For NVIDIA GPU, GPU ROM should be patched. See next section.
 ** NVIDIA GPU Patching
-***** Dump GPU VBIOS
+**** Dump GPU VBIOS
 Using GPU-Z in Windows is the easiest method of dumping VBIOS. The following command didn't work for me but it's worth trying.
 #+BEGIN_SRC bash
   su
@@ -47,10 +47,10 @@ Using GPU-Z in Windows is the easiest method of dumping VBIOS. The following com
   cat /sys/bus/pci/devices/0000:01:00.0/rom > vbios.rom
   echo 0 > /sys/bus/pci/devices/0000:01:00.0/rom
 #+END_SRC
-***** Patch VBIOS file
+**** Patch VBIOS file
 Use Hex Editor and search string "VIDEO", and remove everything before HEX value *55*. There are bunch of 0s or fs usually..
 
-***** Using Patched VBIOS file
+**** Using Patched VBIOS file
 You need to edit configution file of VM.
 #+BEGIN_SRC bash
   sudo virsh edit win10
@@ -59,9 +59,9 @@ Search for *hostdev*. Add
 #+BEGIN_SRC xml
   <rom file="path/to/your/patched_vbios.rom"/>
 #+END_SRC
-before *address* tag.
+before *<address>* tag.
 ** Keyboard/mouse Passthrough
-***** You need to modify libvirt configuration.
+**** You need to modify libvirt configuration.
 #+BEGIN_SRC bash
   sudo virsh edit win10
 #+END_SRC
@@ -73,18 +73,15 @@ to
 #+BEGIN_SRC xml
   <domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
 #+END_SRC
-***** Find your keyboard and mouse devices. Use the devices having *event* in their name.
+**** Find your keyboard and mouse devices. Use the devices having *event* in their name.
 #+BEGIN_SRC bash
   ls /dev/input/by-id/
 #+END_SRC
-***** Verify you selected the right device by using following command. You should see output on terminal when using that device..
+**** Verify you selected the right device by using following command. You should see output on terminal when using that device..
 #+BEGIN_SRC bash
   cat /dev/input/by-id/your_device
 #+END_SRC
-***** Add devices to the configuration. Replace "MOUSE_NAME" and "KEYBOARD_NAME" with your device id.
-#+BEGIN_SRC bash
-virsh edit win10
-#+END_SRC
+**** Add devices to the configuration. Add it before closing </domain> tag Replace "MOUSE_NAME" and "KEYBOARD_NAME" with your device id.
 #+BEGIN_SRC xml
   <qemu:commandline>
     <qemu:arg value='-object'/>
@@ -93,7 +90,7 @@ virsh edit win10
     <qemu:arg value='input-linux,id=kbd1,evdev=/dev/input/by-id/KEYBOARD_NAME,grab_all=on,repeat=on'/>
   </qemu:commandline>
 #+END_SRC
-***** Switch from PS/2 to virtio inputs. Add following configuration before mouse/keyboard ps2 config.
+**** Switch from PS/2 to virtio inputs. Add it before mouse/keyboard ps2 config.
 #+BEGIN_SRC xml
   <input type='mouse' bus='virtio'>
     <address type='pci' domain='0x0000' bus='0x00' slot='0x0e' function='0x0'/>
@@ -101,4 +98,28 @@ virsh edit win10
   <input type='keyboard' bus='virtio'>
     <address type='pci' domain='0x0000' bus='0x00' slot='0x0f' function='0x0'/>
   </input>
+#+END_SRC
+**** Include these devices in qemu config. You can replace entire file.
+#+BEGIN_SRC conf
+  user = "your_username"
+  group = "kvm"
+
+  cgroup_device_acl = [
+      "/dev/kvm",
+      "/dev/input/by-id/KEYBOARD_NAME",
+      "/dev/input/by-id/MOUSE_NAME",
+      "/dev/null", "/dev/full", "/dev/zero",
+      "/dev/random", "/dev/urandom",
+      "/dev/ptmx", "/dev/kvm", "/dev/kqemu",
+      "/dev/rtc","/dev/hpet", "/dev/sev"
+  ]
+#+END_SRC
+** Add user to different groups
+*** Add user to groups input, kvm, libvirt to make sure it has access to required config and devices.
+#+BEGIN_SRC bash
+  sudo usermod -aG input,kvm,libvirt username
+#+END_SRC
+Restart libvirtd service
+#+BEGIN_SRC bash
+  sudo systemctl restart libvirtd
 #+END_SRC
