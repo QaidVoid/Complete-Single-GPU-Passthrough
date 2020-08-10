@@ -94,9 +94,6 @@ virsh edit win10
   </qemu:commandline>
 #+END_SRC
 ***** Switch from PS/2 to virtio inputs. Add following configuration before mouse/keyboard ps2 config.
-#+BEGIN_SRC bash
-  sudo virsh edit win10
-#+END_SRC
 #+BEGIN_SRC xml
   <input type='mouse' bus='virtio'>
     <address type='pci' domain='0x0000' bus='0x00' slot='0x0e' function='0x0'/>
