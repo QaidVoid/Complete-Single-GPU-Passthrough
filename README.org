@@ -50,13 +50,22 @@ Using GPU-Z in Windows is the easiest method of dumping VBIOS. The following com
 ***** Patch VBIOS file
 Use Hex Editor and search string "VIDEO", and remove everything before HEX value *55*. There are bunch of 0s or fs usually..
 
-***** Using Pactched VBIOS file
-You need to edit configution file of VM. Search for *hostdev*. Add *<rom file="path/to/your/patched_vbios.rom"/>* before address.
+***** Using Patched VBIOS file
+You need to edit configution file of VM.
 #+BEGIN_SRC bash
   sudo virsh edit win10
 #+END_SRC
+Search for *hostdev*. Add
+#+BEGIN_SRC xml
+  <rom file="path/to/your/patched_vbios.rom"/>
+#+END_SRC
+before *address* tag.
 ** Keyboard/mouse Passthrough
-You need to modify libvirt configuration. Modify first line
+You need to modify libvirt configuration.
+#+BEGIN_SRC bash
+  sudo virsh edit win10
+#+END_SRC
+Modify first line
 #+BEGIN_SRC xml
   <domain type='kvm'>
 #+END_SRC
@@ -83,7 +92,4 @@ virsh edit win10
     <qemu:arg value='-object'/>
     <qemu:arg value='input-linux,id=kbd1,evdev=/dev/input/by-id/KEYBOARD_NAME,grab_all=on,repeat=on'/>
   </qemu:commandline>
-#+END_SRC
-#+BEGIN_SRC bash
-  sudo virsh edit win10
 #+END_SRC
