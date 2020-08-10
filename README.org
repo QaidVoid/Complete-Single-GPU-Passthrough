@@ -224,12 +224,8 @@ Add the following content to script:
 Virtual machine's audio can be routed to host as an application using libvirt. \\
 Add following config inside *<qemu:commandline>* tag we set up during keyboard/mouse passthrough.
 #+BEGIN_SRC xml
-  <qemu:arg value="-device"/>
-  <qemu:arg value="ich9-intel-hda,bus=pcie.0,addr=0x1b"/>
-  <qemu:arg value="-device"/>
-  <qemu:arg value="hda-micro,audiodev=hda"/>
   <qemu:arg value="-audiodev"/>
-  <qemu:arg value="pa,id=hda,server=unix:/tmp/pulse-socket"/>
+  <qemu:arg value="pa,id=snd0,server=/run/user/1000/pulse/native"/>
 #+END_SRC
 * Tweaks
 NVIDIA has troubles with VM. So, get ready to smash things up.
