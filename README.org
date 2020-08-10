@@ -1,1 +1,36 @@
-
+* Set up IOMMU
+** Enable IOMMU
+Load /etc/default/grub and append *intel_iommu=on* or *amd_iommu=on* to GRUB_CMDLINE_LINUX_DEFAULT. Also, *iommu=pt*.\
+Update grub configuration.
+#+BEGIN_SRC bash
+  grub-mkconfig -o /boot/grub/grub.cfg
+#+END_SRC
+** Verify IOMMU is enabled successfully
+You should see *IOMMU enabled* in output.
+#+BEGIN_SRC bash
+  dmesg | grep -i -e DMAR -e IOMMU | grep enabled
+#+END_SRC
+* Set up VM
+** Installation
+Install the required packages.
+#+BEGIN_SRC bash
+  sudo pacman -S qemu libvirt edk2-ovmf virt-manager dnsmasq ebtables iptables
+#+END_SRC
+** Starting services
+Enable and start libvirt service
+#+BEGIN_SRC bash
+  sudo systemctl enable libvirtd
+  sudo systemctl start libvirtd
+#+END_SRC
+** Start default network
+This may not be needed. If default network isn't started by default for you, start the network manually.
+#+BEGIN_SRC bash
+  sudo virsh net-start default
+  sudo virsh net-autostart default
+#+END_SRC
+** Setup Guest OS
+Launch virt-manager, and start creating guest. On final step, check *Customize before install*.
+> In the *Overview* section, set Chipset to *Q35* and firmware to *UEFI*
+> In the *CPUs* section, change CPU model to *host-passthrough*. You need to type it.\
+  According to Arch Wiki, this makes sure that the CPU is detected properly. Without it, some applications may complain about your CPU being of an unknown model.\
+Now, you can *Begin Installation*.
