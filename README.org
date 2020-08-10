@@ -1,3 +1,4 @@
+*** Resources from [[https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF][ArchWiki]] and [[https://github.com/joeknock90/Single-GPU-Passthrough][joeknock's passthrough guide]]
 * Set up IOMMU
 ** Enable IOMMU
 **** Load /etc/default/grub and append "intel_iommu=on" or "amd_iommu=on" to GRUB_CMDLINE_LINUX_DEFAULT. Also, "iommu=pt".
@@ -218,4 +219,34 @@ Add the following content to script:
 
   # Restart Display Manager
   systemctl start display-manager
+#+END_SRC
+* Passing VM Audio to Host via Pulseaudio
+Virtual machine's audio can be routed to host as an application using libvirt. \\
+Add following config inside *<qemu:commandline>* tag we set up during keyboard/mouse passthrough.
+#+BEGIN_SRC xml
+  <qemu:arg value="-device"/>
+  <qemu:arg value="ich9-intel-hda,bus=pcie.0,addr=0x1b"/>
+  <qemu:arg value="-device"/>
+  <qemu:arg value="hda-micro,audiodev=hda"/>
+  <qemu:arg value="-audiodev"/>
+  <qemu:arg value="pa,id=hda,server=unix:/tmp/pulse-socket"/>
+#+END_SRC
+* Tweaks
+NVIDIA has troubles with VM. So, get ready to smash things up.
+*** Switch to full KVM mode
+Add to *<features>* tag.
+#+BEGIN_SRC xml
+  <ioapic driver='kvm'/>
+#+END_SRC
+*** Error 43 fix
+NVIDIA checks if an hypervisor is running and fails if it detects one. It can be fixed by spoofing vendor_id for the hypervisor. \\
+Add to *<hyperv>* tag
+#+BEGIN_SRC xml
+  <vendor_id state='on' value='whatever'/>
+#+END_SRC
+Add to *<features>* tag
+#+BEGIN_SRC xml
+  <kvm>
+    <hidden state='on'/>
+  </kvm>
 #+END_SRC
