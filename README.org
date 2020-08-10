@@ -61,7 +61,7 @@ Search for *hostdev*. Add
 #+END_SRC
 before *address* tag.
 ** Keyboard/mouse Passthrough
-You need to modify libvirt configuration.
+***** You need to modify libvirt configuration.
 #+BEGIN_SRC bash
   sudo virsh edit win10
 #+END_SRC
@@ -73,15 +73,15 @@ to
 #+BEGIN_SRC xml
   <domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
 #+END_SRC
-Find your keyboard and mouse devices. Use the devices having *event* in their name.
+***** Find your keyboard and mouse devices. Use the devices having *event* in their name.
 #+BEGIN_SRC bash
   ls /dev/input/by-id/
 #+END_SRC
-Verify you selected the right device by using following command. You should see output on terminal when using that device..
+***** Verify you selected the right device by using following command. You should see output on terminal when using that device..
 #+BEGIN_SRC bash
   cat /dev/input/by-id/your_device
 #+END_SRC
-Add devices to the configuration. Replace *MOUSE_NAME* and *KEYBOARD_NAME* with your device id.
+***** Add devices to the configuration. Replace "MOUSE_NAME" and "KEYBOARD_NAME" with your device id.
 #+BEGIN_SRC bash
 virsh edit win10
 #+END_SRC
@@ -92,4 +92,16 @@ virsh edit win10
     <qemu:arg value='-object'/>
     <qemu:arg value='input-linux,id=kbd1,evdev=/dev/input/by-id/KEYBOARD_NAME,grab_all=on,repeat=on'/>
   </qemu:commandline>
+#+END_SRC
+***** Switch from PS/2 to virtio inputs. Add following configuration before mouse/keyboard ps2 config.
+#+BEGIN_SRC bash
+  sudo virsh edit win10
+#+END_SRC
+#+BEGIN_SRC xml
+  <input type='mouse' bus='virtio'>
+    <address type='pci' domain='0x0000' bus='0x00' slot='0x0e' function='0x0'/>
+  </input>
+  <input type='keyboard' bus='virtio'>
+    <address type='pci' domain='0x0000' bus='0x00' slot='0x0f' function='0x0'/>
+  </input>
 #+END_SRC
