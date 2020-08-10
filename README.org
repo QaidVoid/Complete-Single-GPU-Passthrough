@@ -31,6 +31,59 @@
 ** Setup Guest OS
 ***** Launch virt-manager, and start creating guest. On final step, check "Customize before install".
 ***** > In the "Overview" section, set Chipset to "Q35" and firmware to "UEFI".
-***** > In the "CPUs" section, change CPU model to "host-passthrough". You need to type it manually.
-*****   According to Arch Wiki, this makes sure that the CPU is detected properly. Without it, some applications may complain about your CPU being of an unknown model.
-***** Now, you can *Begin Installation*.
+***** > In the "CPUs" section, change CPU model to "host-passthrough". You need to type it manually. According to Arch Wiki, this makes sure that the CPU is detected properly. Without it, some applications may complain about your CPU being of an unknown model.
+***** > Set Disk Bus of Storage to "virtio".
+***** > Set NIC Device Model to "virtio".
+***** Now, you can *Begin Installation*. You can continue installing Windows right now or after setting up Passthrough.
+** Attach PCI devices
+***** Remove devices such as Spice Channel, XQL video adaper, USB tablet, etc.
+***** Click on "Add Hardware" and add PCI devices for GPU and HDMI Audio. For NVIDIA GPU, GPU ROM should be patched. See next section.
+** NVIDIA GPU Patching
+***** Dump GPU VBIOS
+Using GPU-Z in Windows is the easiest method of dumping VBIOS. The following command didn't work for me but it's worth trying.
+#+BEGIN_SRC bash
+  su
+  echo 1 > /sys/bus/pci/devices/0000:01:00.0/rom
+  cat /sys/bus/pci/devices/0000:01:00.0/rom > vbios.rom
+  echo 0 > /sys/bus/pci/devices/0000:01:00.0/rom
+#+END_SRC
+***** Patch VBIOS file
+Use Hex Editor and search string "VIDEO", and remove everything before HEX value *55*. There are bunch of 0s or fs usually..
+
+***** Using Pactched VBIOS file
+You need to edit configution file of VM. Search for *hostdev*. Add *<rom file="path/to/your/patched_vbios.rom"/>* before address.
+#+BEGIN_SRC bash
+  sudo virsh edit win10
+#+END_SRC
+** Keyboard/mouse Passthrough
+You need to modify libvirt configuration. Modify first line
+#+BEGIN_SRC xml
+  <domain type='kvm'>
+#+END_SRC
+to
+#+BEGIN_SRC xml
+  <domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
+#+END_SRC
+Find your keyboard and mouse devices. Use the devices having *event* in their name.
+#+BEGIN_SRC bash
+  ls /dev/input/by-id/
+#+END_SRC
+Verify you selected the right device by using following command. You should see output on terminal when using that device..
+#+BEGIN_SRC bash
+  cat /dev/input/by-id/your_device
+#+END_SRC
+Add devices to the configuration. Replace *MOUSE_NAME* and *KEYBOARD_NAME* with your device id.
+#+BEGIN_SRC bash
+virsh edit win10
+#+END_SRC
+#+BEGIN_SRC xml
+  <qemu:commandline>
+    <qemu:arg value='-object'/>
+    <qemu:arg value='input-linux,id=mouse1,evdev=/dev/input/by-id/MOUSE_NAME'/>
+    <qemu:arg value='-object'/>
+    <qemu:arg value='input-linux,id=kbd1,evdev=/dev/input/by-id/KEYBOARD_NAME,grab_all=on,repeat=on'/>
+  </qemu:commandline>
+#+END_SRC
+#+BEGIN_SRC bash
+  sudo virsh edit win10
+#+END_SRC
