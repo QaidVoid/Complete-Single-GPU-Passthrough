@@ -29,10 +29,8 @@ This may not be needed. If default network isn't started by default for you, sta
   sudo virsh net-autostart default
 #+END_SRC
 ** Setup Guest OS
-#+BEGIN_VERSE
-Launch virt-manager, and start creating guest. On final step, check *Customize before install*.
-> In the *Overview* section, set Chipset to *Q35* and firmware to *UEFI*.
-> In the *CPUs* section, change CPU model to *host-passthrough*. You need to type it manually.
-  According to Arch Wiki, this makes sure that the CPU is detected properly. Without it, some applications may complain about your CPU being of an unknown model.
-Now, you can *Begin Installation*.
-#+END_VERSE
+***** Launch virt-manager, and start creating guest. On final step, check *Customize before install*.
+***** > In the *Overview* section, set Chipset to *Q35* and firmware to *UEFI*.
+***** > In the *CPUs* section, change CPU model to *host-passthrough*. You need to type it manually.
+*****   According to Arch Wiki, this makes sure that the CPU is detected properly. Without it, some applications may complain about your CPU being of an unknown model.
+***** Now, you can *Begin Installation*.
