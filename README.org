@@ -19,6 +19,8 @@
 #+END_SRC
 **** Get virtio drivers ready
 ***** You can't install Windows without virtio drivers. Click [[https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso][here]] to download.
+***** YOu need to add it to VM CDROM. You'll get "Media driver missing" error when installing Windows. Select '/virtio-disk/amd64/win10'
+***** Install virtio drivers from CDROM after installing Windows to get everything working..
 ** Starting services
 **** Enable and start libvirt service
 #+BEGIN_SRC bash
