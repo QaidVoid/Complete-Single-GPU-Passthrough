@@ -16,6 +16,8 @@
 #+BEGIN_SRC bash
   sudo pacman -S qemu libvirt edk2-ovmf virt-manager dnsmasq ebtables iptables
 #+END_SRC
+**** Get virtio drivers ready
+***** You can't install Windows without virtio drivers. Click [[https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso][here]] to download.
 ** Starting services
 **** Enable and start libvirt service
 #+BEGIN_SRC bash
@@ -29,12 +31,12 @@
   sudo virsh net-autostart default
 #+END_SRC
 ** Setup Guest OS
-**** Launch virt-manager, and start creating guest. On final step, check "Customize before install".
-**** > In the "Overview" section, set Chipset to "Q35" and firmware to "UEFI".
-**** > In the "CPUs" section, change CPU model to "host-passthrough". You need to type it manually. According to Arch Wiki, this makes sure that the CPU is detected properly. Without it, some applications may complain about your CPU being of an unknown model.
-**** > Set Disk Bus of Storage to "virtio".
-**** > Set NIC Device Model to "virtio".
-**** Now, you can *Begin Installation*. You can continue installing Windows right now or after setting up Passthrough.
+***** Launch virt-manager, and start creating guest. On final step, check "Customize before install".
+***** > In the "Overview" section, set Chipset to "Q35" and firmware to "UEFI".
+***** > In the "CPUs" section, change CPU model to "host-passthrough". You need to type it manually. According to Arch Wiki, this makes sure that the CPU is detected properly. Without it, some applications may complain about your CPU being of an unknown model.
+***** > Set Disk Bus of Storage to "virtio".
+***** > Set NIC Device Model to "virtio".
+***** Now, you can *Begin Installation*. You can continue installing Windows right now or after setting up Passthrough.
 ** Attach PCI devices
 **** Remove devices such as Spice Channel, XQL video adaper, USB tablet, etc.
 **** Click on "Add Hardware" and add PCI devices for GPU and HDMI Audio. For NVIDIA GPU, GPU ROM should be patched. See next section.
@@ -115,11 +117,105 @@ to
   ]
 #+END_SRC
 ** Add user to different groups
-*** Add user to groups input, kvm, libvirt to make sure it has access to required config and devices.
+**** Add user to groups input, kvm, libvirt to make sure it has access to required config and devices.
 #+BEGIN_SRC bash
   sudo usermod -aG input,kvm,libvirt username
 #+END_SRC
 Restart libvirtd service
 #+BEGIN_SRC bash
   sudo systemctl restart libvirtd
+#+END_SRC
+* Libvirt Hooks
+***** Libvirt hooks automates the process of running specific tasks during VM startup and shutdown.
+**** Create libvirt hook
+#+BEGIN_SRC bash
+  sudo mkdir /etc/libvirt/hooks/
+  sudo touch /etc/libvirt/hooks/qemu
+#+END_SRC
+***** Add following content to the qemu hook
+More at: [[https://passthroughpo.st/simple-per-vm-libvirt-hooks-with-the-vfio-tools-hook-helper/][PassthroughPost]] \\
+Restart libvirtd service after creating qemu hook
+#+BEGIN_SRC bash
+  #!/bin/bash
+
+  GUEST_NAME="$1"
+  HOOK_NAME="$2"
+  STATE_NAME="$3"
+  MISC="${@:4}"
+
+  BASEDIR="$(dirname $0)"
+
+  HOOKPATH="$BASEDIR/qemu.d/$GUEST_NAME/$HOOK_NAME/$STATE_NAME"
+
+  set -e # If a script exits with an error, we should as well.
+
+  if [ -f "$HOOKPATH" ]; then
+      eval \""$HOOKPATH"\" "$@"
+  elif [ -d "$HOOKPATH" ]; then
+      while read file; do
+	  eval \""$file"\" "$@"
+      done <<< "$(find -L "$HOOKPATH" -maxdepth 1 -type f -executable -print;)"
+  fi
+#+END_SRC
+**** Create start script
+Create script that gets executed by libvirt hook when you start VM. Script name can be anything..
+#+BEGIN_SRC bash
+  sudo mkdir -p /etc/libvirt/hooks/qemu.d/win10/prepare/begin
+  sudo touch /etc/libvirt/hooks/qemu.d/win10/prepare/begin/start.sh
+  sudo chmod +x /etc/libvirt/hooks/qemu.d/win10/prepare/begin/start.sh
+#+END_SRC
+Add the following content to script:
+#+BEGIN_SRC bash
+  #!/bin/bash
+
+  set -x
+
+  # Stop display manager
+  systemctl stop display-manager
+
+  # Unbind EFI Framebuffer
+  echo efi-framebuffer.0 > /sys/bus/platform/drivers/efi-framebuffer/unbind
+
+  # Remove nvidia modules from kernel
+  modprobe -r nvidia_drm nvidia_modeset nvidia_uvm nvidia
+  # Figure it out AMD
+
+  # Detach GPU devices from host
+  virsh nodedev-detach pci_0000_01_00_0
+  virsh nodedev-detach pci_0000_01_00_1
+
+  # Add vfio-pci to linux kernel
+  modprobe vfio-pci
+#+END_SRC
+**** Create stop script
+Create script that gets executed by libvirt hook when you shutdown/destroy VM. Script name can be anything..
+#+BEGIN_SRC bash
+  sudo mkdir -p /etc/libvirt/hooks/qemu.d/win10/release/end
+  sudo touch /etc/libvirt/hooks/qemu.d/win10/release/end/shutdown.sh
+  sudo chmod +x /etc/libvirt/hooks/qemu.d/win10/release/end/shutdown.sh
+#+END_SRC
+Add the following content to script:
+#+BEGIN_SRC bash
+  #!/bin/bash
+
+  set -x
+
+  # Remove vfio-pci from kernel
+  modprobe -r vfio-pci
+
+  # Attach GPU devices to host
+  virsh nodedev-reattach pci_0000_01_00_0
+  virsh nodedev-reattach pci_0000_01_00_1
+
+  # Rebind framebuffer to host
+  echo "efi-framebuffer.0" > /sys/bus/platform/drivers/efi-framebuffer/bind
+
+  # Add NVIDIA modules back to kernel
+  modprobe nvidia_drm
+  modprobe nvidia_modeset
+  modprobe nvidia_uvm
+  modprobe nvidia
+
+  # Restart Display Manager
+  systemctl start display-manager
 #+END_SRC
