@@ -36,7 +36,7 @@
 ** Setup Guest OS
 ***** Launch virt-manager, and start creating guest. On final step, check "Customize before install".
 ***** > In the "Overview" section, set Chipset to "Q35" and firmware to "UEFI".
-***** > In the "CPUs" section, change CPU model to "host-passthrough". You need to type it manually. According to Arch Wiki, this makes sure that the CPU is detected properly. Without it, some applications may complain about your CPU being of an unknown model.
+***** > In the "CPUs" section, change CPU model to "host-passthrough". You need to type it manually. According to Arch Wiki, this makes sure that the CPU is detected properly. Without it, some applications may complain about your CPU being of an unknown model. You might also need to setup "CPU tolpology" manually if VM only uses one core when you've assigned it more.
 ***** > Set Disk Bus of Storage to "virtio".
 ***** > Set NIC Device Model to "virtio".
 ***** Now, you can *Begin Installation*. You can continue installing Windows right now or after setting up Passthrough.
@@ -45,7 +45,8 @@
 **** Click on "Add Hardware" and add PCI devices for GPU and HDMI Audio. For NVIDIA GPU, GPU ROM should be patched. See next section.
 ** NVIDIA GPU Patching
 **** Dump GPU VBIOS
-Using GPU-Z in Windows is the easiest method of dumping VBIOS. The following command didn't work for me but it's worth trying.
+Using GPU-Z in Windows is the easiest method of dumping VBIOS. You can also download vBIOS from [[https://www.techpowerup.com/vgabios/][TechPowerUp]] (didn't work for me). \\
+The following command didn't work for me but it's worth trying.
 #+BEGIN_SRC bash
   su
   echo 1 > /sys/bus/pci/devices/0000:01:00.0/rom
@@ -53,7 +54,7 @@ Using GPU-Z in Windows is the easiest method of dumping VBIOS. The following com
   echo 0 > /sys/bus/pci/devices/0000:01:00.0/rom
 #+END_SRC
 **** Patch VBIOS file
-Use Hex Editor and search string "VIDEO", and remove everything before HEX value *55*. There are bunch of 0s or fs usually..
+Use Hex Editor and search string "VIDEO", and remove everything before char *U*, i.e. HEX value *55*.
 
 **** Using Patched VBIOS file
 You need to edit configution file of VM.
@@ -130,6 +131,10 @@ Restart libvirtd service
 #+END_SRC
 * Libvirt Hooks
 ***** Libvirt hooks automates the process of running specific tasks during VM startup and shutdown.
+Replace *win10* with your guestname. \\ Find GPU kernel modules using command
+#+BEGIN_SRC bash
+lspci -vnn | grep VGA -A 12 | grep modules
+#+END_SRC
 **** Create libvirt hook
 #+BEGIN_SRC bash
   sudo mkdir /etc/libvirt/hooks/
@@ -179,15 +184,18 @@ Add the following content to script:
   # Unbind EFI Framebuffer
   echo efi-framebuffer.0 > /sys/bus/platform/drivers/efi-framebuffer/unbind
 
-  # Remove nvidia modules from kernel
+  # Unload NVIDIA kernel modules
   modprobe -r nvidia_drm nvidia_modeset nvidia_uvm nvidia
-  # Figure it out AMD
+
+  # Unload AMD kernel module
+  # modprobe -r amdgpu
 
   # Detach GPU devices from host
+  # Use your GPU VGA and Audio PCI host device
   virsh nodedev-detach pci_0000_01_00_0
   virsh nodedev-detach pci_0000_01_00_1
 
-  # Add vfio-pci to linux kernel
+  # Load vfio module
   modprobe vfio-pci
 #+END_SRC
 **** Create stop script
@@ -203,21 +211,25 @@ Add the following content to script:
 
   set -x
 
-  # Remove vfio-pci from kernel
+  # Unload vfio module
   modprobe -r vfio-pci
 
   # Attach GPU devices to host
+  # Use your GPU VGA and Audio PCI host device
   virsh nodedev-reattach pci_0000_01_00_0
   virsh nodedev-reattach pci_0000_01_00_1
 
   # Rebind framebuffer to host
   echo "efi-framebuffer.0" > /sys/bus/platform/drivers/efi-framebuffer/bind
 
-  # Add NVIDIA modules back to kernel
+  # Load NVIDIA kernel modules
   modprobe nvidia_drm
   modprobe nvidia_modeset
   modprobe nvidia_uvm
   modprobe nvidia
+
+  # Load AMD kernel module
+  # modprobe amdgpu
 
   # Restart Display Manager
   systemctl start display-manager
@@ -230,13 +242,12 @@ Add following config inside *<qemu:commandline>* tag we set up during keyboard/m
   <qemu:arg value="pa,id=snd0,server=/run/user/1000/pulse/native"/>
 #+END_SRC
 * Tweaks
-NVIDIA has troubles with VM. So, get ready to smash things up.
 *** Switch to full KVM mode
 Add to *<features>* tag.
 #+BEGIN_SRC xml
   <ioapic driver='kvm'/>
 #+END_SRC
-*** Error 43 fix
+*** NVIDIA Driver Error fix
 NVIDIA checks if an hypervisor is running and fails if it detects one. It can be fixed by spoofing vendor_id for the hypervisor. \\
 Add to *<hyperv>* tag
 #+BEGIN_SRC xml
