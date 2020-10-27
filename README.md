@@ -2,6 +2,8 @@
 #### ** TODO : NOT SURE **
 
 ## Manual Setup
+<b>Note</b>: Replace win10 with your virtual machine's name on libvirt hooks and virsh commands.
+
 <details>
   <summary><b>Enable IOMMU</b></summary>
 
