@@ -52,10 +52,10 @@
 
   Launch <b>virt-manager</b> and create new virtual machine. Check <b>Customize before install</b> on final step.
   
-  <b>Overview</b> > Chipset: Q35, Firmware: UEFI
-  <b>CPUs</b> > CPU model: host-passthrough, CPU topology: Best for your machine :)
-  <b>SATA Disk</b> > Disk bus: virtio
-  <b>NIC</b> > Device model: virtio
+  <b>Overview</b> > Chipset: Q35, Firmware: UEFI<br/>
+  <b>CPUs</b> > CPU model: host-passthrough, CPU topology: Best for your machine :)<br/>
+  <b>SATA Disk</b> > Disk bus: virtio<br/>
+  <b>NIC</b> > Device model: virtio<br/>
   <b>Add Hardware</b> > CDROM: virtio-win.iso
   
   <b>Begin Installation</b> and install Windows.. Windows can't detect virtio devices, so you need to <b>Load Driver</b> from <b>virtio-disk/amd64/win10</b> when prompted.
@@ -77,7 +77,7 @@
   <details>
   <summary><b>Dump GPU vBIOS</b></summary>
   
-  <b>Windows</b> > Use [GPU-Z](https://www.techpowerup.com/gpuz/)
+  <b>Windows</b> > Use [GPU-Z](https://www.techpowerup.com/gpuz/)<br/>
   <b>Linux</b> > Try following but doesn't seem to work:
 
   ```sh
@@ -236,13 +236,13 @@
 </details>
 </details>
 
-[Video card driver virtualisation detection](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Video_card_driver_virtualisation_detection)
-[Keyboard/Mouse Passthrough](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Passing_keyboard/mouse_via_Evdev)
-[Audio Passthrough](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Passing_VM_audio_to_host_via_PulseAudio)
+[Video card driver virtualisation detection](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Video_card_driver_virtualisation_detection)<br/>
+[Keyboard/Mouse Passthrough](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Passing_keyboard/mouse_via_Evdev)<br/>
+[Audio Passthrough](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Passing_VM_audio_to_host_via_PulseAudio)<br/>
 [Troubleshooting](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Troubleshooting)
 
 <b>See Also</b>
-> [Single GPU Passthrough by joeknock90](https://github.com/joeknock90/Single-GPU-Passthrough)
-> [Single GPU Passthrough by YuriAlek](https://gitlab.com/YuriAlek/vfio)
-> [ArchLinux PCI Passthrough](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF)
-> [Gentoo GPU Passthrough](https://wiki.gentoo.org/wiki/GPU_passthrough_with_libvirt_qemu_kvm)
+> [Single GPU Passthrough by joeknock90](https://github.com/joeknock90/Single-GPU-Passthrough)<br/>
+> [Single GPU Passthrough by YuriAlek](https://gitlab.com/YuriAlek/vfio)<br/>
+> [ArchLinux PCI Passthrough](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF)<br/>
+> [Gentoo GPU Passthrough](https://wiki.gentoo.org/wiki/GPU_passthrough_with_libvirt_qemu_kvm)<br/>
