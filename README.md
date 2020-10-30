@@ -1,5 +1,9 @@
 ## Automated Setup
-#### ** TODO : NOT SURE **
+#### Install required tools
+```sh
+sudo pacman -S qemu libvirt edk2-ovmf virt-manager dnsmasq ebtables iptables
+```
+
 
 ## Manual Setup
 <b>Note</b>: Replace win10 with your virtual machine's name on libvirt hooks and virsh commands.
