@@ -18,6 +18,10 @@ void install_tools()
 void enable_services()
 {
     std::string init_sys = get_init();
+    std::cout << "\033[1;36mDetected " + init_sys + " init system. \033[0m";
+    if (init_sys != "systemd")
+        throw std::runtime_error("\033[1;36mOnly systemd is supported at the moment. \033[0m");
+    // TODO
     if (init_sys == "systemd")
         system("systemctl enable --now libvirtd");
     else // Other init systems?
@@ -49,10 +53,13 @@ std::string get_init()
 
 void user_mod()
 {
+    std::cout << "\n\033[1;36mAdding user to kvm, input & libvirt group \033[0m";
     std::string res = shell_cmd("usermod -aG kvm,input,libvirt $(logname)");
     if (!res.empty())
     {
+        std::cout << "\033[1;31m\u2718\033[0m" << std::endl;
         std::string emsg = "\n\033[1;31m" + res + "\033[0m";
         throw std::runtime_error(emsg);
     }
+    std::cout << "\033[1;32m\u2714\033[0m" << std::endl;
 }

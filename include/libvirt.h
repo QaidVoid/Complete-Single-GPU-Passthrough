@@ -11,6 +11,7 @@ std::string begin_script();
 std::string end_script();
 
 inline const char *hooks_path = "/etc/libvirt/hooks";
+inline const char *qemu_dir = "/etc/libvirt/hooks/qemu.d";
 inline const char *qemu_hook = "/etc/libvirt/hooks/qemu";
 inline const char *vm_path = "/etc/libvirt/hooks/qemu.d/win10";
 

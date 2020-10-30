@@ -1,9 +1,13 @@
 ## Automated Setup
-#### Install required tools
+###### Not well-tested. Only supports systemd init system. Installs packages, enables iommu and creates libvirt hooks for now.
 ```sh
-sudo pacman -S qemu libvirt edk2-ovmf virt-manager dnsmasq ebtables iptables
-```
+make
+sudo ./passthrough
 
+OR
+
+sudo make run
+```
 
 ## Manual Setup
 <b>Note</b>: Replace win10 with your virtual machine's name on libvirt hooks and virsh commands.

@@ -23,19 +23,21 @@ std::string get_gpu_vendor()
 std::string get_vga_slot()
 {
     std::string c = "lspci | grep -i vga.*" + get_gpu_vendor();
-    std::string res = shell_cmd((char *)&c);
+    std::string res = shell_cmd(c.c_str());
 
     if (res.empty())
         throw std::runtime_error("\n\033[1;31mCouldn't fetch VGA PCI slot!\033[0m");
-    return "0000:" + res.substr(0, res.find(" "));
+    std::replace(res.begin(), res.end(), ':', '_');
+    return "pci_0000_" + res.substr(0, res.find(" "));
 }
 
 std::string get_audio_slot()
 {
     std::string c = "lspci | grep -i audio.*" + get_gpu_vendor();
-    std::string res = shell_cmd((char *)&c);
+    std::string res = shell_cmd(c.c_str());
 
     if (res.empty())
         throw std::runtime_error("\n\033[1;31mCouldn't fetch Audio PCI slot!\033[0m");
-    return "0000:" + res.substr(0, res.find(" "));
+    std::replace(res.begin(), res.end(), ':', '_');
+    return "pci_0000_" + res.substr(0, res.find(" "));
 }
