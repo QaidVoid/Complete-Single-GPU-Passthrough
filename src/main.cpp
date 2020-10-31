@@ -6,6 +6,10 @@ int main()
 {
     try
     {
+        std::string user = shell_cmd("echo $(whoami)");
+        if (user != "root")
+            throw std::runtime_error("\033[1;31mYou need to run the tool as root.\033[0m");
+
         char cnf;
         configure_iommu();
 

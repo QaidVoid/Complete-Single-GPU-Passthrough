@@ -1,5 +1,7 @@
 ## Automated Setup
 ###### Not well-tested. Only supports systemd init system. Installs packages, enables iommu and creates libvirt hooks for now.
+###### Halted till December.
+###### TODO: upstart, openrc, sysv support. Automatic VM creation and passthrough support. Libvirt script for window managers.
 ```sh
 make
 sudo ./passthrough

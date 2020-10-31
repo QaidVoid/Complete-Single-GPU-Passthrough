@@ -1,9 +1,8 @@
-CXX		  := g++
-CXX_FLAGS := -Wall -Wextra -std=c++17
+CXX			:= g++
+CXX_FLAGS	:= -Wall -Wextra -std=c++17
 
-BIN		:= bin
-SRC		:= src
-INCLUDE	:= include
+SRC			:= src
+INCLUDE		:= include
 
 EXECUTABLE	:= passthrough
 
