@@ -1,15 +1,5 @@
 ## Automated Setup
-###### UNTESTED.. DO NOT USE...
-###### FEATURES: Enable IOMMU, Copy Libvirt scripts from scripts folder to libvirt hooks path..
-##### TODO: EVERYTHING
-
-##### Replace win10 to your domain name for VM..
-##### Configure scripts/qemu.d/win10/prepare/begin/begin.sh
-##### Configure scripts/qemu.d/win10/release/end/end.sh
-
-```sh
-sudo ./setup.sh
-```
+#### WORKING ON IT!!!
 
 ## Manual Setup
 <b>Note</b>: Replace win10 with your virtual machine's name on libvirt hooks and virsh commands.
