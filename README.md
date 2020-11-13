@@ -1,14 +1,14 @@
 ## Automated Setup
-###### Not well-tested. Only supports systemd init system. Installs packages, enables iommu and creates libvirt hooks for now.
-###### Halted till December.
-###### TODO: upstart, openrc, sysv support. Automatic VM creation and passthrough support. Libvirt script for window managers.
+###### UNTESTED.. DO NOT USE...
+###### FEATURES: Enable IOMMU, Copy Libvirt scripts from scripts folder to libvirt hooks path..
+##### TODO: EVERYTHING
+
+##### Replace win10 to your domain name for VM..
+##### Configure scripts/qemu.d/win10/prepare/begin/begin.sh
+##### Configure scripts/qemu.d/win10/release/end/end.sh
+
 ```sh
-make
-sudo ./passthrough
-
-OR
-
-sudo make run
+sudo ./setup.sh
 ```
 
 ## Manual Setup
@@ -42,7 +42,7 @@ sudo make run
   <summary><b>Install required tools</b></summary>
 
   ```sh
-  sudo pacman -S qemu libvirt edk2-ovmf virt-manager dnsmasq ebtables iptables
+  sudo pacman -S qemu libvirt edk2-ovmf virt-manager dnsmasq ebtables
   ```
 </details>
 
