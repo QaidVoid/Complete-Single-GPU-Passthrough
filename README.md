@@ -12,8 +12,6 @@ grub-mkconfig -o /boot/grub/grub.cfg
 ```
 #### Reboot your system for the changes to take effect.
 
-<br/>
-
 ### **Verify IOMMU**
 #### ***If you don't see any output when running following command, IOMMU is not functioning.***
 ```sh
@@ -45,8 +43,6 @@ dmesg | grep 'IOMMU enabled'
   ```
 </details>
 
-<br/>
-
 ### **Enable required services**
 <details>
   <summary><b>SystemD</b></summary>
@@ -65,7 +61,7 @@ dmesg | grep 'IOMMU enabled'
   ```
 </details>
 
-### Sometimes, you might need to start default network manually.
+#### Sometimes, you might need to start default network manually.
 ```sh
 virsh net-start default
 virsh net-autostart default
@@ -74,23 +70,21 @@ virsh net-autostart default
 ### **Setup Guest OS**
 ### ***NOTE: You should replace win10 with your VM's name where applicable***
 #### ***Download [virtio](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso) driver.***
-### Launch ***virt-manager*** and create a new virtual machine. Select ***Customize before install*** on Final Step.
-### In ***Overview*** section, set ***Chipset*** to ***Q35***, and ***Firmware*** to ***UEFI***
-### In ***CPUs*** section, set ***CPU model*** to ***host-passthrough***, and ***CPU Topology*** to whatever fits your system.
-### For ***SATA*** disk of VM, set ***Disk Bus*** to ***virtio***.
-### In ***NIC*** section, set ***Device Model*** to ***virtio***
-### Add Hardware > CDROM: virtio-win.iso
-### Now, ***Begin Installation***. Windows can't detect the ***virtio disk***, so you need to ***Load Driver*** and select ***virtio-iso/amd64/win10*** when prompted.
-### After successful installation of Windows, install virtio drivers from virtio CDROM.
-
-<br/>
+#### Launch ***virt-manager*** and create a new virtual machine. Select ***Customize before install*** on Final Step.
+#### In ***Overview*** section, set ***Chipset*** to ***Q35***, and ***Firmware*** to ***UEFI***
+#### In ***CPUs*** section, set ***CPU model*** to ***host-passthrough***, and ***CPU Topology*** to whatever fits your system.
+#### For ***SATA*** disk of VM, set ***Disk Bus*** to ***virtio***.
+#### In ***NIC*** section, set ***Device Model*** to ***virtio***
+#### Add Hardware > CDROM: virtio-win.iso
+#### Now, ***Begin Installation***. Windows can't detect the ***virtio disk***, so you need to ***Load Driver*** and select ***virtio-iso/amd64/win10*** when prompted.
+#### After successful installation of Windows, install virtio drivers from virtio CDROM.
 
 ### **Attaching PCI devices**
-### Remove Channel Spice, Display Spice, Video XQL, Sound ich* and other unnecessary devices.
-### Now, click on ***Add Hardware***, select ***PCI Devices*** and add the PCI Host devices for your GPU's VGA and HDMI Audio
-### Some GPU vBIOS needs to be patched for UEFI Support.
+#### Remove Channel Spice, Display Spice, Video XQL, Sound ich* and other unnecessary devices.
+#### Now, click on ***Add Hardware***, select ***PCI Devices*** and add the PCI Host devices for your GPU's VGA and HDMI Audio
+#### Some GPU vBIOS needs to be patched for UEFI Support.
 ----- TODO: vBIOS patching ------
-### To use patched vBIOS, edit VM's configuration
+#### To use patched vBIOS, edit VM's configuration
 ```sh
 virsh edit win10
 ```
