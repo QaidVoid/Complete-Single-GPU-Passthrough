@@ -461,6 +461,12 @@ virsh edit win10
 </tr>
 </table>
 
+### User Groups
+You should add your user to ***input***, ***kvm***, and ***libvirt*** groups.
+```sh
+usermod -aG kvm,input,libvirt username
+```
+
 ### **See Also**
 > [Single GPU Passthrough by joeknock90](https://github.com/joeknock90/Single-GPU-Passthrough)<br/>
 > [Single GPU Passthrough by YuriAlek](https://gitlab.com/YuriAlek/vfio)<br/>
