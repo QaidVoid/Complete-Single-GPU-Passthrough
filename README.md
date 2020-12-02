@@ -6,6 +6,7 @@ For GRUB user, edit grub configuration.
 | `GRUB_CMDLINE_LINUX_DEFAULT="... intel_iommu=on iommu=pt ..."` |
 | OR |
 | `GRUB_CMDLINE_LINUX_DEFAULT="... amd_iommu=on iommu=pt ..."` |
+
 ***Generate grub.cfg***
 ```sh
 grub-mkconfig -o /boot/grub/grub.cfg
@@ -287,7 +288,7 @@ virsh edit win10
 </tr>
 </table>
 
-Find your keyboard and mouse devices in ***/dev/input/by-id***. You'd generally use the devices ending with ***event-kbd*** and ***event-mouse***. And the devices in your configuration right before closing `</domain>` tag. \
+Find your keyboard and mouse devices in ***/dev/input/by-id***. You'd generally use the devices ending with ***event-kbd*** and ***event-mouse***. And the devices in your configuration right before closing ***`</domain>`*** tag. \
 Replace ***MOUSE_NAME*** and ***KEYBOARD_NAME*** with your device id.
 
 <table>
@@ -346,7 +347,7 @@ cgroup_device_acl = [
 </tr>
 </table>
 
-Also, switch from PS/2 devices to virtio devices. Add the devices inside ***<devices>*** block
+Also, switch from PS/2 devices to virtio devices. Add the devices inside ***`<devices>`*** block
 <table>
 <tr>
 <th>
