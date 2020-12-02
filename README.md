@@ -83,7 +83,7 @@ After successful installation of Windows, install virtio drivers from virtio CDR
 Remove Channel Spice, Display Spice, Video XQL, Sound ich* and other unnecessary devices. \
 Now, click on ***Add Hardware***, select ***PCI Devices*** and add the PCI Host devices for your GPU's VGA and HDMI Audio \
 Some GPU vBIOS needs to be patched for UEFI Support. \
------ TODO: vBIOS patching ------ \
+***----- TODO: vBIOS patching ------*** \
 To use patched vBIOS, edit VM's configuration to include patched vBIOS inside ***hostdev*** block of VGA
 
   ```sh
@@ -265,6 +265,201 @@ systemctl start display-manager
   </tr>
   </table>
 </details>
+
+### Keyboard/Mouse Passthrough
+Modify libvirt configuration of your VM. Change first line to:
+
+<table>
+<tr>
+<th>
+virsh edit win10
+</th>
+</tr>
+
+<tr>
+<td>
+
+```xml
+<domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
+```
+
+</td>
+</tr>
+</table>
+
+Find your keyboard and mouse devices in ***/dev/input/by-id***. You'd generally use the devices ending with ***event-kbd*** and ***event-mouse***. And the devices in your configuration right before closing `</domain>` tag. \
+Replace ***MOUSE_NAME*** and ***KEYBOARD_NAME*** with your device id.
+
+<table>
+<tr>
+<th>
+virsh edit win10
+</th>
+</tr>
+
+<tr>
+<td>
+
+```xml
+...
+  <qemu:commandline>
+    <qemu:arg value='-object'/>
+    <qemu:arg value='input-linux,id=mouse1,evdev=/dev/input/by-id/MOUSE_NAME'/>
+    <qemu:arg value='-object'/>
+    <qemu:arg value='input-linux,id=kbd1,evdev=/dev/input/by-id/KEYBOARD_NAME,grab_all=on,repeat=on'/>
+  </qemu:commandline>
+</domain>
+```
+
+</td>
+</tr>
+</table>
+
+You need to include these devices in your qemu config.
+<table>
+<tr>
+<th>
+/etc/libvirt/qemu.conf
+</th>
+</tr>
+
+<tr>
+<td>
+
+```sh
+...
+user = "YOUR_USERNAME"
+group = "kvm"
+...
+cgroup_device_acl = [
+    "/dev/input/by-id/KEYBOARD_NAME",
+    "/dev/input/by-id/MOUSE_NAME",
+    "/dev/null", "/dev/full", "/dev/zero",
+    "/dev/random", "/dev/urandom",
+    "/dev/ptmx", "/dev/kvm", "/dev/kqemu",
+    "/dev/rtc","/dev/hpet", "/dev/sev"
+]
+...
+```
+
+</td>
+</tr>
+</table>
+
+Also, switch from PS/2 devices to virtio devices. Add the devices inside ***<devices>*** block
+<table>
+<tr>
+<th>
+virsh edit win10
+</th>
+</tr>
+
+<tr>
+<td>
+
+```xml
+...
+<devices>
+  ...
+  <input type='mouse' bus='virtio'/>
+  <input type='keyboard' bus='virtio'/>
+  ...
+</devices>
+...
+```
+
+</td>
+</tr>
+</table>
+
+### **Audio Passthrough**
+VM's audio can be routed to the host. You need ***Pulseaudio***. \
+Modify the libvirt configuration of your VM.
+
+<table>
+<tr>
+<th>
+virsh edit win10
+</th>
+</tr>
+
+<tr>
+<td>
+
+```xml
+...
+  <qemu:commandline>
+    ...
+    <qemu:arg value="-device"/>
+    <qemu:arg value="ich9-intel-hda,bus=pcie.0,addr=0x1b"/>
+    <qemu:arg value="-device"/>
+    <qemu:arg value="hda-micro,audiodev=hda"/>
+    <qemu:arg value="-audiodev"/>
+    <qemu:arg value="pa,id=hda,server=/run/user/1000/pulse/native"/>
+  </qemu:commandline>
+</devices>
+```
+
+</td>
+</tr>
+</table>
+
+### Video card driver virtualisation detection
+Video Card drivers refuse to run in Virtual Machine, so you need to spoof Hyper-V Vendor ID.
+<table>
+<tr>
+<th>
+virsh edit win10
+</th>
+</tr>
+
+<tr>
+<td>
+
+```xml
+...
+<features>
+  ...
+  <hyperv>
+    ...
+    <vendor_id state='on' value='whatever'/>
+    ...
+  </hyperv>
+  ...
+</features>
+...
+```
+
+</td>
+</tr>
+</table>
+
+Nvidia guest drivers also require hiding the KVM CPU leaf:
+<table>
+<tr>
+<th>
+virsh edit win10
+</th>
+</tr>
+
+<tr>
+<td>
+
+```xml
+...
+<features>
+  ...
+  <kvm>
+    <hidden state='on'/>
+  </kvm>
+  ...
+</features>
+...
+```
+
+</td>
+</tr>
+</table>
 
 ### **See Also**
 > [Single GPU Passthrough by joeknock90](https://github.com/joeknock90/Single-GPU-Passthrough)<br/>
