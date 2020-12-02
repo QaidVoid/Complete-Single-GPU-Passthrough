@@ -117,7 +117,7 @@ To use patched vBIOS, edit VM's configuration to include patched vBIOS inside **
   </tr>
   </table>
 
-### Libvirt Hooks
+### **Libvirt Hooks**
 Libvirt hooks automate the process of running specific tasks during VM state change. \
 More info at: [PassthroughPost](https://passthroughpo.st/simple-per-vm-libvirt-hooks-with-the-vfio-tools-hook-helper/)
 <details>
@@ -266,7 +266,7 @@ systemctl start display-manager
   </table>
 </details>
 
-### Keyboard/Mouse Passthrough
+### **Keyboard/Mouse Passthrough**
 Modify libvirt configuration of your VM. Change first line to:
 
 <table>
@@ -404,7 +404,7 @@ virsh edit win10
 </tr>
 </table>
 
-### Video card driver virtualisation detection
+### **Video card driver virtualisation detection**
 Video Card drivers refuse to run in Virtual Machine, so you need to spoof Hyper-V Vendor ID.
 <table>
 <tr>
@@ -434,7 +434,7 @@ virsh edit win10
 </tr>
 </table>
 
-Nvidia guest drivers also require hiding the KVM CPU leaf:
+NVIDIA guest drivers also require hiding the KVM CPU leaf:
 <table>
 <tr>
 <th>
@@ -461,8 +461,8 @@ virsh edit win10
 </tr>
 </table>
 
-### User Groups
-You should add your user to ***input***, ***kvm***, and ***libvirt*** groups.
+### **User Groups**
+You should add your user to ***input***, ***kvm***, and ***libvirt*** groups to be able to run VM without root.
 ```sh
 usermod -aG kvm,input,libvirt username
 ```
