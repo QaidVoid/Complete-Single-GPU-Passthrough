@@ -190,7 +190,7 @@ set -x
 
 # Stop display manager
 systemctl stop display-manager
-# rc-service display-manager stop
+# rc-service xdm stop
 
 # Unbind EFI Framebuffer
 echo efi-framebuffer.0 > /sys/bus/platform/drivers/efi-framebuffer/unbind
@@ -259,7 +259,7 @@ modprobe nvidia
 
 # Restart Display Manager
 systemctl start display-manager
-# rc-service display-manager start
+# rc-service xdm start
   ```
 
   </td>
