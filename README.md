@@ -82,9 +82,24 @@ After successful installation of Windows, install virtio drivers from virtio CDR
 
 ### **Attaching PCI devices**
 Remove Channel Spice, Display Spice, Video XQL, Sound ich* and other unnecessary devices. \
-Now, click on ***Add Hardware***, select ***PCI Devices*** and add the PCI Host devices for your GPU's VGA and HDMI Audio \
-Some GPU vBIOS needs to be patched for UEFI Support. \
-***----- TODO: vBIOS patching ------*** \
+Now, click on ***Add Hardware***, select ***PCI Devices*** and add the PCI Host devices for your GPU's VGA and HDMI Audio.
+
+### **vBIOS Patching**
+While most of the GPU can be passed with stock vBIOS, some GPU requires vBIOS to be patched in order to be work correctly, specially NVIDIA Pascal Series GPU. \
+In order to patch vBIOS, you need to first dump the GPU vBIOS from your system. \
+If you have Windows installed, you can use [GPU-Z](https://www.techpowerup.com/gpuz) to dump vBIOS. \
+To dump vBIOS on Linux, you can use following command (replace PCI id with yours): \
+I didn't manage to get this to work on Arch Linux but works on Gentoo. So, it might not work depending on your distribution. \
+In which case, you can try using live cd.
+```sh
+echo 1 > /sys/bus/pci/devices/0000:01:00.0/rom
+cat /sys/bus/pci/devices/0000:01:00.0/rom > path/to/dump/vbios.rom
+echo 0 > /sys/bus/pci/devices/0000:01:00.0/rom
+```
+To patch vBIOS, you need to use Hex Editor (eg., [Okteta](https://utils.kde.org/projects/okteta)) \
+For NVIDIA GPU (esp. Pascal Series), using hex editor, search string “VIDEO”, and remove everything before HEX value 55. \
+For other GPU, I have no idea.
+
 To use patched vBIOS, edit VM's configuration to include patched vBIOS inside ***hostdev*** block of VGA
 
   <table>
