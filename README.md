@@ -87,11 +87,6 @@ Some GPU vBIOS needs to be patched for UEFI Support. \
 ***----- TODO: vBIOS patching ------*** \
 To use patched vBIOS, edit VM's configuration to include patched vBIOS inside ***hostdev*** block of VGA
 
-  ```sh
-  mkdir /etc/libvirt/hooks
-  touch /etc/libvirt/hooks/qemu
-  chmod +x /etc/libvirt/hooks/qemu
-  ```
   <table>
   <tr>
   <th>
