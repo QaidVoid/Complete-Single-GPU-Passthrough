@@ -85,7 +85,7 @@ Remove Channel Spice, Display Spice, Video XQL, Sound ich* and other unnecessary
 Now, click on ***Add Hardware***, select ***PCI Devices*** and add the PCI Host devices for your GPU's VGA and HDMI Audio.
 
 ### **vBIOS Patching**
-While most of the GPU can be passed with stock vBIOS, some GPU requires vBIOS to be patched in order to be work correctly, specially NVIDIA Pascal Series GPU. \
+While most of the GPU can be passed with stock vBIOS, some GPU requires vBIOS to be patched in order to work correctly, specially NVIDIA Pascal Series GPU. \
 In order to patch vBIOS, you need to first dump the GPU vBIOS from your system. \
 If you have Windows installed, you can use [GPU-Z](https://www.techpowerup.com/gpuz) to dump vBIOS. \
 To dump vBIOS on Linux, you can use following command (replace PCI id with yours): \
