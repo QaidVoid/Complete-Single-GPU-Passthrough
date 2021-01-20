@@ -81,7 +81,7 @@ Now, ***Begin Installation***. Windows can't detect the ***virtio disk***, so yo
 After successful installation of Windows, install virtio drivers from virtio CDROM.
 
 ### **Attaching PCI devices**
-Remove Channel Spice, Display Spice, Video XQL, Sound ich* and other unnecessary devices. \
+Remove Channel Spice, Display Spice, Video QXL, Sound ich* and other unnecessary devices. \
 Now, click on ***Add Hardware***, select ***PCI Devices*** and add the PCI Host devices for your GPU's VGA and HDMI Audio.
 
 ### **vBIOS Patching**
