@@ -1,6 +1,6 @@
 ## **Troubleshoot your troubles**
 ### Where is the log?
-The logs are stored in /var/libvirt/qemu/vm_name.log, where vm_name is the name of the VM you're trying to boot. \
+The logs are stored in /var/log/libvirt/qemu/vm_name.log, where vm_name is the name of the VM you're trying to boot. \
 By reading the few lines at the bottom of the log file, you get general idea of what might be an issue.
 
 ### warning: host doesn't support requested feature, what is this?
