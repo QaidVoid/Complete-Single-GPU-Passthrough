@@ -1,4 +1,17 @@
-### **Enable IOMMU**
+## **Table Of Contents**
+* **[IOMMU Setup](#enable--verify-iommu)**
+* **[Installing Packages](#install-required-tools)**
+* **[Enabling Services](#enable-required-services)**
+* **[Guest Setup](#setup-guest-os)**
+* **[Attching PCI Devices](#attaching-pci-devices)**
+* **[Libvirt Hooks](#libvirt-hooks)**
+* **[Keyboard/Mouse Passthrough](#keyboardmouse-passthrough)**
+* **[Video Card Virtualisation Detection](#video-card-driver-virtualisation-detection)**
+* **[Audio Passthrough](#audio-passthrough)**
+* **[GPU vBIOS Patching](#vbios-patching)**
+* **[TROUBLESHOOTING](TROUBLESHOOTING.md)**
+
+### **Enable & Verify IOMMU**
 ***Set the kernel paramater depending on your CPU.*** \
 For GRUB user, edit grub configuration.
 | /etc/default/grub |
@@ -13,8 +26,8 @@ grub-mkconfig -o /boot/grub/grub.cfg
 ```
 Reboot your system for the changes to take effect.
 
-### **Verify IOMMU**
-***If you don't see any output when running following command, IOMMU is not functioning.***
+***To verify IOMMU, run the following command, which should return result.***
+
 ```sh
 dmesg | grep 'IOMMU enabled'
 ```
@@ -44,6 +57,14 @@ dmesg | grep 'IOMMU enabled'
   ```
 </details>
 
+<details>
+  <summary><b>Ubuntu</b></summary>
+
+  ```sh
+  apt install libvirt-bin bridge-utils virt-manager qemu-kvm ovmf
+  ```
+</details>
+
 ### **Enable required services**
 <details>
   <summary><b>SystemD</b></summary>
@@ -70,6 +91,11 @@ virsh net-autostart default
 
 ### **Setup Guest OS**
 ***NOTE: You should replace win10 with your VM's name where applicable*** \
+You should add your user to ***libvirt*** group to be able to run VM without root. And, ***input*** and ***kvm*** group for passing input devices.
+```sh
+usermod -aG kvm,input,libvirt username
+```
+
 Download [virtio](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso) driver. \
 Launch ***virt-manager*** and create a new virtual machine. Select ***Customize before install*** on Final Step. \
 In ***Overview*** section, set ***Chipset*** to ***Q35***, and ***Firmware*** to ***UEFI*** \
@@ -83,50 +109,6 @@ After successful installation of Windows, install virtio drivers from virtio CDR
 ### **Attaching PCI devices**
 Remove Channel Spice, Display Spice, Video QXL, Sound ich* and other unnecessary devices. \
 Now, click on ***Add Hardware***, select ***PCI Devices*** and add the PCI Host devices for your GPU's VGA and HDMI Audio.
-
-### **vBIOS Patching**
-While most of the GPU can be passed with stock vBIOS, some GPU requires vBIOS to be patched in order to work correctly, specially NVIDIA Pascal Series GPU. \
-In order to patch vBIOS, you need to first dump the GPU vBIOS from your system. \
-If you have Windows installed, you can use [GPU-Z](https://www.techpowerup.com/gpuz) to dump vBIOS. \
-To dump vBIOS on Linux, you can use following command (replace PCI id with yours): \
-I didn't manage to get this to work on Arch Linux but works on Gentoo. So, it might not work depending on your distribution. \
-In which case, you can try using live cd.
-```sh
-echo 1 > /sys/bus/pci/devices/0000:01:00.0/rom
-cat /sys/bus/pci/devices/0000:01:00.0/rom > path/to/dump/vbios.rom
-echo 0 > /sys/bus/pci/devices/0000:01:00.0/rom
-```
-To patch vBIOS, you need to use Hex Editor (eg., [Okteta](https://utils.kde.org/projects/okteta)) \
-For NVIDIA GPU (esp. Pascal Series), using hex editor, search string “VIDEO”, and remove everything before HEX value 55. \
-For other GPU, I have no idea.
-
-To use patched vBIOS, edit VM's configuration to include patched vBIOS inside ***hostdev*** block of VGA
-
-  <table>
-  <tr>
-  <th>
-  virsh edit win10
-  </th>
-  </tr>
-
-  <tr>
-  <td>
-
-  ```xml
-  ...
-  <hostdev mode='subsystem' type='pci' managed='yes'>
-    <source>
-      ...
-    </source>
-    <rom file='/home/me/patched.rom'/>
-    ...
-  </hostdev>
-  ...
-  ```
-
-  </td>
-  </tr>
-  </table>
 
 ### **Libvirt Hooks**
 Libvirt hooks automate the process of running specific tasks during VM state change. \
@@ -384,7 +366,8 @@ virsh edit win10
 </table>
 
 ### **Audio Passthrough**
-VM's audio can be routed to the host. You need ***Pulseaudio***. \
+VM's audio can be routed to the host. You need ***Pulseaudio***. It's hit or miss. \
+You can also use [Scream](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Passing_VM_audio_to_host_via_Scream) instead of Pulseaudio. \
 Modify the libvirt configuration of your VM.
 
 <table>
@@ -472,14 +455,54 @@ virsh edit win10
 </tr>
 </table>
 
-### **User Groups**
-You should add your user to ***input***, ***kvm***, and ***libvirt*** groups to be able to run VM without root.
+### **vBIOS Patching**
+***NOTE: vBIOS patching is not patching directly into the hardware. You only patch the dumped ROM file.*** \
+While most of the GPU can be passed with stock vBIOS, some GPU requires vBIOS patching depending on your host distro. \
+In order to patch vBIOS, you need to first dump the GPU vBIOS from your system. \
+If you have Windows installed, you can use [GPU-Z](https://www.techpowerup.com/gpuz) to dump vBIOS. \
+To dump vBIOS on Linux, you can use following command (replace PCI id with yours): \
+If it doesn't work on your distro, you can try using live cd.
 ```sh
-usermod -aG kvm,input,libvirt username
+echo 1 > /sys/bus/pci/devices/0000:01:00.0/rom
+cat /sys/bus/pci/devices/0000:01:00.0/rom > path/to/dump/vbios.rom
+echo 0 > /sys/bus/pci/devices/0000:01:00.0/rom
 ```
+To patch vBIOS, you need to use Hex Editor (eg., [Okteta](https://utils.kde.org/projects/okteta)) and trim unnecessary header. \
+For NVIDIA GPU, using hex editor, search string “VIDEO”, and remove everything before HEX value 55. \
+For other GPU, I have no idea.
+
+To use patched vBIOS, edit VM's configuration to include patched vBIOS inside ***hostdev*** block of VGA
+
+  <table>
+  <tr>
+  <th>
+  virsh edit win10
+  </th>
+  </tr>
+
+  <tr>
+  <td>
+
+  ```xml
+  ...
+  <hostdev mode='subsystem' type='pci' managed='yes'>
+    <source>
+      ...
+    </source>
+    <rom file='/home/me/patched.rom'/>
+    ...
+  </hostdev>
+  ...
+  ```
+
+  </td>
+  </tr>
+  </table>
 
 ### **See Also**
 > [Single GPU Passthrough by joeknock90](https://github.com/joeknock90/Single-GPU-Passthrough)<br/>
 > [Single GPU Passthrough by YuriAlek](https://gitlab.com/YuriAlek/vfio)<br/>
 > [ArchLinux PCI Passthrough](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF)<br/>
 > [Gentoo GPU Passthrough](https://wiki.gentoo.org/wiki/GPU_passthrough_with_libvirt_qemu_kvm)<br/>
+
+
