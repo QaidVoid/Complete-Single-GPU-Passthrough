@@ -1,17 +1,32 @@
 ## PLAIN QEMU WITHOUT LIBVIRT
 ### WORK IN PROGRESS
+### ONLY USE THIS IF YOU KNOW WHAT YOU'RE DOING
+
+I don't use VMs so I didn't test it extensively. \
+Only tested it for if it actually passes GPU, and it seems to do the job. \
+You need to figure out missing pieces on your own.
 
 Passthrough can be done with plain qemu without using libvirt. \
-The general idea of using plain qemu is to avoid managing libvirt configurations and rather use a single script.. \
+The general idea of using plain qemu is to avoid managing libvirt configurations and rather use a single portable script.
 
-Stuffs directly taken from YuriAlek's [script](https://gitlab.com/YuriAlek/vfio/-/blob/master/scripts/windows-basic.sh).
+Stuffs taken from YuriAlek's [script](https://gitlab.com/YuriAlek/vfio/-/blob/master/scripts/windows-basic.sh).
 
 Create disk image with QEMU.
 ```sh
 qemu-img create -f raw Disk.img 256G
 ```
 
-The script should be run as superuser.
+The script should be run as superuser. \
+Run with nohup to make the script run even after terminal closes.
+```sh
+doas nohup ./passthrough.sh > ~/qemu.log 2>&1
+```
+
+Use ``lspci -nn`` command to get device ids.
+```
+01:00.0 VGA compatible controller [0300]: NVIDIA Corporation GP106 [GeForce GTX 1060 6GB] [10de:1c03] (rev a1)
+01:00.1 Audio device [0403]: NVIDIA Corporation GP106 High Definition Audio Controller [10de:10f1] (rev a1)
+```
 
 ```sh
 #!/bin/sh
@@ -21,6 +36,13 @@ ULIMIT=$(ulimit -a | grep "max locked memory" | awk '{print $6}')
 # Replace 4 with the amount of RAM you supply to the VM (in GB)
 ULIMIT_TARGET=$((4 * 1048576 + 100000))
 
+# 
+
+VIDEOID="10de 1c03"
+VIDEOBUSID="0000:01:00.0"
+AUDIOID="10de 10f1"
+AUDIOBUSID="0000:01:00.1"
+
 ulimit -l $ULIMIT_TARGET
 
 # Should be run before VM starts
@@ -28,7 +50,7 @@ function init_vm() {
 	# Stop display manager (if any exists)
 	# rc-service xdm stop
 	# systemctl stop display-manager 
-	pkill -9 dwm
+	pkill -9 emacs 
 
 	sleep 1
 	# Unbind EFI-framebuffer
@@ -42,15 +64,15 @@ function init_vm() {
 	modprobe vfio-pci
 
 	# Bind drivers to vfio
-	echo "10de 1c03" > /sys/bus/pci/drivers/vfio-pci/new_id
-	echo "0000:01:00.0" > /sys/bus/pci/devices/0000:01:00.0/driver/unbind
-	echo "0000:01:00.0" > /sys/bus/pci/drivers/vfio-pci/bind
-	echo "10de 1c03" > /sys/bus/pci/drivers/vfio-pci/remove_id
+	echo $VIDEOID > /sys/bus/pci/drivers/vfio-pci/new_id
+	echo $VIDEOBUSID > /sys/bus/pci/devices/0000:01:00.0/driver/unbind
+	echo $VIDEOBUSID > /sys/bus/pci/drivers/vfio-pci/bind
+	echo $VIDEOID > /sys/bus/pci/drivers/vfio-pci/remove_id
 
-	echo "10de 10f1" > /sys/bus/pci/drivers/vfio-pci/new_id
-	echo "0000:01:00.1" > /sys/bus/pci/devices/0000:01:00.1/driver/unbind
-	echo "0000:01:00.1" > /sys/bus/pci/drivers/vfio-pci/bind
-	echo "10de 10f1" > /sys/bus/pci/drivers/vfio-pci/remove_id
+	echo $AUDIOID > /sys/bus/pci/drivers/vfio-pci/new_id
+	echo $AUDIOBUSID > /sys/bus/pci/devices/0000:01:00.1/driver/unbind
+	echo $AUDIOBUSID > /sys/bus/pci/drivers/vfio-pci/bind
+	echo $AUDIOID > /sys/bus/pci/drivers/vfio-pci/remove_id
 }
 
 # Start VM
@@ -70,6 +92,7 @@ function start_vm() {
 		-net nic \
 		-net user \
 		-vga none \
+		-nographic \
 		-device vfio-pci,host=01:00.0,x-vga=on,multifunction=on \
 		-device vfio-pci,host=01:00.1 \
 		-object input-linux,id=mouse1,evdev=/dev/input/by-id/usb-PixArt_HP_USB_Optical_Mouse-event-mouse \
@@ -82,11 +105,7 @@ function start_vm() {
 function stop_vm() {
 	# Unload VFIO modules
 	modprobe -r vfio-pci
-	
 	ulimit -l $ULIMIT
-
-	# Reboot system, because I have no idea how to rebind drivers
-	reboot
 
 	# Load GPU modules
 	modprobe nvidia_drm
@@ -94,18 +113,17 @@ function stop_vm() {
 	modprobe nvidia_uvm
 	modprobe nvidia
 	# modprobe amdgpu
-
-	# Attach GPU to host ? driver doesn't exist ? 
-	echo "0000:01:00.0" > /sys/bus/pci/devices/0000:01:00.0/driver/bind
-	echo "0000:01:00.1" > /sys/bus/pci/devices/0000:01:00.1/driver/bind
-
+	
 	# Bind EFI framebuffer to host
 	echo "efi-framebuffer.0" > /sys/bus/platform/drivers/efi-framebuffer/bind
 	
-	# Restart Display Manager
+	# Restart Display Manager - I don't have display manager to test
 	# rc-service xdm start
 	# systemctl start display-manager
-	# su - qaidvoid -c startx
+
+	# Couldn't get display back on host..
+	# Rebooting seems to be the best option
+	reboot
 }
 
 init_vm
