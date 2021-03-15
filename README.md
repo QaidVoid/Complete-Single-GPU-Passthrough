@@ -35,7 +35,9 @@ dmesg | grep 'IOMMU enabled'
 ### **Install required tools**
 <details>
   <summary><b>Gentoo Linux</b></summary>
-
+  RECOMMENDED USE FLAGS: app-emulation/virt-manager gtk<br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; app-emulation/qemu spice usb usbredir pulseaudio
+                         
   ```sh
   emerge -av qemu virt-manager libvirt ebtables dnsmasq
   ```
@@ -61,7 +63,7 @@ dmesg | grep 'IOMMU enabled'
   <summary><b>Ubuntu</b></summary>
 
   ```sh
-  apt install libvirt-bin bridge-utils virt-manager qemu-kvm ovmf
+  apt install qemu-kvm qemu-utils libvirt-daemon-system libvirt-clients bridge-utils virt-manager ovmf
   ```
 </details>
 
@@ -104,7 +106,7 @@ For ***SATA*** disk of VM, set ***Disk Bus*** to ***virtio***. \
 In ***NIC*** section, set ***Device Model*** to ***virtio*** \
 Add Hardware > CDROM: virtio-win.iso \
 Now, ***Begin Installation***. Windows can't detect the ***virtio disk***, so you need to ***Load Driver*** and select ***virtio-iso/amd64/win10*** when prompted. \
-After successful installation of Windows, install virtio drivers from virtio CDROM.
+After successful installation of Windows, install virtio drivers from virtio CDROM. You can then remove virtio iso.
 
 ### **Attaching PCI devices**
 Remove Channel Spice, Display Spice, Video QXL, Sound ich* and other unnecessary devices. \
