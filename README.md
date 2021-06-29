@@ -9,7 +9,7 @@
 * **[Video Card Virtualisation Detection](#video-card-driver-virtualisation-detection)**
 * **[Audio Passthrough](#audio-passthrough)**
 * **[GPU vBIOS Patching](#vbios-patching)**
-* **[TROUBLESHOOTING](TROUBLESHOOTING.md)**
+* **[TROUBLESHOOTING](#troubleshooting)**
 
 ### **Enable & Verify IOMMU**
 ***Set the kernel paramater depending on your CPU.*** \
@@ -501,10 +501,34 @@ To use patched vBIOS, edit VM's configuration to include patched vBIOS inside **
   </tr>
   </table>
 
+### **Troubleshooting**
+### Where is the log?
+The logs are stored in ***/var/log/libvirt/qemu/vm_name.log***, where vm_name is the name of the VM you're trying to boot. \
+By reading the few lines at the bottom of the log file, you get general idea of what might be an issue.
+
+### **warning: host doesn't support requested feature, what is this?**
+This warning usually means that the feature guest is requesting is not available on host. \
+After the warning message, on same line, you'll see something like MSR(490H).vmx-entry-load-perf-global-ctrl \
+That's the feature it's missing, but I have no idea what most of them indicate.
+
+#### How to fix it?
+Make sure you've enabled ***Intel VT-d*** or ***AMD-Vi*** in BIOS Settings. \
+If you've set ***BIOS*** as Firmware for Guest, change to ***UEFI***. \
+In the cpu section in log file, you might see something like this: \
+***-cpu Skylake,vme=on,ss=on,vmx=on,...***. Although, it works in most cases, it doesn't in some. \
+Make sure you've set ***host-passthrough*** CPU model which'll produce ***-cpu host,...*** instead.
+
+### **shutting down, reason=failed, but no actual error?**
+If the VM fails without an error, SSH into your host machine, and run libvirt start script from SSH Client. \
+If the script works without producing error, you'd get blank screen, and you can try starting VM from SSH Client, which might provide error message. \
+Both commands should be run as superuser.
+```sh
+sh /etc/libvirt/hooks/qemu.d/win10/prepare/begin/start.sh
+virsh start win10
+```
+
 ### **See Also**
 > [Single GPU Passthrough by joeknock90](https://github.com/joeknock90/Single-GPU-Passthrough)<br/>
 > [Single GPU Passthrough by YuriAlek](https://gitlab.com/YuriAlek/vfio)<br/>
 > [ArchLinux PCI Passthrough](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF)<br/>
 > [Gentoo GPU Passthrough](https://wiki.gentoo.org/wiki/GPU_passthrough_with_libvirt_qemu_kvm)<br/>
-
-
