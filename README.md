@@ -12,6 +12,10 @@
 * **[TROUBLESHOOTING](#troubleshooting)**
 
 ### **Enable & Verify IOMMU**
+***BIOS Settings*** \
+Enable ***Intel VT-d*** or ***AMD-Vi*** in BIOS settings. \
+If you can't find those virtualization options in BIOS, your hardware probably doesn't support it.
+
 ***Set the kernel paramater depending on your CPU.*** \
 For GRUB user, edit grub configuration.
 | /etc/default/grub |
@@ -31,6 +35,22 @@ Reboot your system for the changes to take effect.
 ```sh
 dmesg | grep 'IOMMU enabled'
 ```
+
+Now, you need to make sure that your IOMMU groups are valid. \
+Run the following script to view the IOMMU groups and attached devices. \
+```sh
+#!/bin/bash
+shopt -s nullglob
+for g in `find /sys/kernel/iommu_groups/* -maxdepth 0 -type d | sort -V`; do
+    echo "IOMMU Group ${g##*/}:"
+    for d in $g/devices/*; do
+        echo -e "\t$(lspci -nns ${d##*/})"
+    done;
+done;
+```
+
+During passthrough, you need to pass every device (except PCI) in the group which includes your GPU. \
+You can avoid having to pass everything by using [ACS override patch](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Bypassing_the_IOMMU_groups_(ACS_override_patch)).
 
 ### **Install required tools**
 <details>
@@ -115,6 +135,10 @@ Now, click on ***Add Hardware***, select ***PCI Devices*** and add the PCI Host 
 ### **Libvirt Hooks**
 Libvirt hooks automate the process of running specific tasks during VM state change. \
 More info at: [PassthroughPost](https://passthroughpo.st/simple-per-vm-libvirt-hooks-with-the-vfio-tools-hook-helper/)
+
+**Note**: Comment Unbind/rebind EFI framebuffer line from start and stop script if you're using AMD 6000 series cards, thanks to [cdgriffith](https://github.com/cdgriffith).
+Also, move the line to unbind AMD kernal module below detaching devices from host. These might also apply to older AMD cards.
+
 <details>
   <summary><b>Create Libvirt Hook</b></summary>
 
@@ -162,7 +186,7 @@ fi
 
 <details>
   <summary><b>Create Start Script</b></summary>
-
+  
   ```sh
   mkdir -p /etc/libvirt/hooks/qemu.d/win10/prepare/begin
   touch /etc/libvirt/hooks/qemu.d/win10/prepare/begin/start.sh
