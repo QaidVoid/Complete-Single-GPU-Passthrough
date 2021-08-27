@@ -137,7 +137,7 @@ Libvirt hooks automate the process of running specific tasks during VM state cha
 More info at: [PassthroughPost](https://passthroughpo.st/simple-per-vm-libvirt-hooks-with-the-vfio-tools-hook-helper/)
 
 **Note**: Comment Unbind/rebind EFI framebuffer line from start and stop script if you're using AMD 6000 series cards, thanks to [cdgriffith](https://github.com/cdgriffith).
-Also, move the line to unbind AMD kernal module below detaching devices from host. These might also apply to older AMD cards.
+Also, move the line to unload AMD kernal module below detaching devices from host. These might also apply to older AMD cards.
 
 <details>
   <summary><b>Create Libvirt Hook</b></summary>
@@ -482,7 +482,7 @@ virsh edit win10
 </table>
 
 ### **vBIOS Patching**
-***NOTE: vBIOS patching is not patching directly into the hardware. You only patch the dumped ROM file.*** \
+***NOTE: You only need patch the dumped ROM file. You don't need to make changes on the hardware BIOS.*** \
 While most of the GPU can be passed with stock vBIOS, some GPU requires vBIOS patching depending on your host distro. \
 In order to patch vBIOS, you need to first dump the GPU vBIOS from your system. \
 If you have Windows installed, you can use [GPU-Z](https://www.techpowerup.com/gpuz) to dump vBIOS. \
@@ -495,7 +495,7 @@ echo 0 > /sys/bus/pci/devices/0000:01:00.0/rom
 ```
 To patch vBIOS, you need to use Hex Editor (eg., [Okteta](https://utils.kde.org/projects/okteta)) and trim unnecessary header. \
 For NVIDIA GPU, using hex editor, search string “VIDEO”, and remove everything before HEX value 55. \
-For other GPU, I have no idea.
+This is probably the same for AMD device.
 
 To use patched vBIOS, edit VM's configuration to include patched vBIOS inside ***hostdev*** block of VGA
 
