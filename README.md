@@ -286,7 +286,15 @@ systemctl start display-manager
 </details>
 
 ### **Keyboard/Mouse Passthrough**
-Modify libvirt configuration of your VM. Change first line to:
+In order to be able to use keyboard/mouse in the VM, you can either passthrough the USB Host device or use Evdev passthrough.
+
+Using USB Host Device is simple, \
+***Add Hardware*** > ***USB Host Device***, add your keyboard and mouse device.
+
+For Evdev passthrough, follow these steps: \
+Modify libvirt configuration of your VM. \
+**Note**: Save only after adding keyboard and mouse devices or the changes gets lost. \
+Change first line to:
 
 <table>
 <tr>
