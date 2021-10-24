@@ -209,6 +209,10 @@ set -x
 # Stop display manager
 systemctl stop display-manager
 # rc-service xdm stop
+      
+# Unbind VTconsoles: might not be needed
+echo 0 > /sys/class/vtconsole/vtcon0/bind
+echo 0 > /sys/class/vtconsole/vtcon1/bind
 
 # Unbind EFI Framebuffer
 echo efi-framebuffer.0 > /sys/bus/platform/drivers/efi-framebuffer/unbind
@@ -274,6 +278,10 @@ modprobe nvidia
 
 # Load AMD kernel module
 # modprobe amdgpu
+      
+# Bind VTconsoles: might not be needed
+echo 1 > /sys/class/vtconsole/vtcon0/bind
+echo 1 > /sys/class/vtconsole/vtcon1/bind
 
 # Restart Display Manager
 systemctl start display-manager
@@ -534,9 +542,9 @@ To use patched vBIOS, edit VM's configuration to include patched vBIOS inside **
   </table>
 
 ### **See Also**
-> [Single GPU Passthrough Troubleshooting](https://docs.google.com/document/d/17Wh9_5HPqAx8HHk-p2bGlR0E-65TplkG18jvM98I7V8)
+> [Single GPU Passthrough Troubleshooting](https://docs.google.com/document/d/17Wh9_5HPqAx8HHk-p2bGlR0E-65TplkG18jvM98I7V8)<br/>
 > [Single GPU Passthrough by joeknock90](https://github.com/joeknock90/Single-GPU-Passthrough)<br/>
 > [Single GPU Passthrough by YuriAlek](https://gitlab.com/YuriAlek/vfio)<br/>
-> [Single GPU Passthrough by wabulu](https://github.com/wabulu/Single-GPU-passthrough-amd-nvidia)
+> [Single GPU Passthrough by wabulu](https://github.com/wabulu/Single-GPU-passthrough-amd-nvidia)<br/>
 > [ArchLinux PCI Passthrough](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF)<br/>
 > [Gentoo GPU Passthrough](https://wiki.gentoo.org/wiki/GPU_passthrough_with_libvirt_qemu_kvm)<br/>
