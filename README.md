@@ -9,7 +9,6 @@
 * **[Video Card Virtualisation Detection](#video-card-driver-virtualisation-detection)**
 * **[Audio Passthrough](#audio-passthrough)**
 * **[GPU vBIOS Patching](#vbios-patching)**
-* **[TROUBLESHOOTING](#troubleshooting)**
 
 ### **Enable & Verify IOMMU**
 ***BIOS Settings*** \
