@@ -29,10 +29,18 @@ grub-mkconfig -o /boot/grub/grub.cfg
 ```
 Reboot your system for the changes to take effect.
 
-***To verify IOMMU, run the following command, which should return result.***
-
+***To verify IOMMU, run the following command.***
 ```sh
-dmesg | grep 'IOMMU enabled'
+dmesg | grep IOMMU
+```
+The output of above command should contain the following message:
+
+```
+Intel-IOMMU: enabled
+```
+or
+```
+AMD-Vi: AMD IOMMUv2 loaded and initialized
 ```
 
 Now, you need to make sure that your IOMMU groups are valid. \
