@@ -15,6 +15,9 @@
 Enable ***Intel VT-d*** or ***AMD-Vi*** in BIOS settings. \
 If you can't find those virtualization options in BIOS, your hardware probably doesn't support it.
 
+Disable **Resizable BAR Support** in BIOS settings. 
+Cards that support Resizable BAR can cause problems with black screens following driver load if Resizable BAR is enabled in UEFI/BIOS. There doesn't seem to be a large performance penalty for disabling it, so turn it off for now until ReBAR support is available for KVM. 
+
 ***Set the kernel paramater depending on your CPU.*** \
 For GRUB user, edit grub configuration.
 | /etc/default/grub |
