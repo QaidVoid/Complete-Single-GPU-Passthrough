@@ -12,10 +12,9 @@
 
 ### **Enable & Verify IOMMU**
 ***BIOS Settings*** \
-Enable ***Intel VT-d*** or ***AMD-Vi*** in BIOS settings. \
-If you can't find those virtualization options in BIOS, your hardware probably doesn't support it.
+Enable ***Intel VT-d*** or ***AMD-Vi*** in BIOS settings. If these options are not present, it is likely that your hardware does not support IOMMU.
 
-Disable **Resizable BAR Support** in BIOS settings. 
+Disable ***Resizable BAR Support*** in BIOS settings. 
 Cards that support Resizable BAR can cause problems with black screens following driver load if Resizable BAR is enabled in UEFI/BIOS. There doesn't seem to be a large performance penalty for disabling it, so turn it off for now until ReBAR support is available for KVM. 
 
 ***Set the kernel paramater depending on your CPU.*** \
@@ -36,18 +35,9 @@ Reboot your system for the changes to take effect.
 ```sh
 dmesg | grep IOMMU
 ```
-The output of above command should contain the following message:
+The output should include the message `Intel-IOMMU: enabled` for Intel CPUs or `AMD-Vi: AMD IOMMUv2 loaded and initialized` for AMD CPUs.
 
-```
-Intel-IOMMU: enabled
-```
-or
-```
-AMD-Vi: AMD IOMMUv2 loaded and initialized
-```
-
-Now, you need to make sure that your IOMMU groups are valid. \
-Run the following script to view the IOMMU groups and attached devices. \
+To view the IOMMU groups and attached devices, run the following script:
 ```sh
 #!/bin/bash
 shopt -s nullglob
@@ -59,15 +49,13 @@ for g in `find /sys/kernel/iommu_groups/* -maxdepth 0 -type d | sort -V`; do
 done;
 ```
 
-During passthrough, you need to pass every device (except PCI) in the group which includes your GPU. \
+When using passthrough, it is necessary to pass every device in the group that includes your GPU. \
 You can avoid having to pass everything by using [ACS override patch](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Bypassing_the_IOMMU_groups_(ACS_override_patch)).
 
 ### **Install required tools**
 <details>
   <summary><b>Gentoo Linux</b></summary>
-  RECOMMENDED USE FLAGS: app-emulation/virt-manager gtk<br>
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; app-emulation/qemu spice usb usbredir pulseaudio
-                         
+
   ```sh
   emerge -av qemu virt-manager libvirt ebtables dnsmasq
   ```
@@ -218,7 +206,6 @@ set -x
 
 # Stop display manager
 systemctl stop display-manager
-# rc-service xdm stop
       
 # Unbind VTconsoles: might not be needed
 echo 0 > /sys/class/vtconsole/vtcon0/bind
@@ -295,7 +282,6 @@ echo 1 > /sys/class/vtconsole/vtcon1/bind
 
 # Restart Display Manager
 systemctl start display-manager
-# rc-service xdm start
 ```
 
   </td>
@@ -508,20 +494,25 @@ virsh edit win10
 </table>
 
 ### **vBIOS Patching**
-***NOTE: You only need patch the dumped ROM file. You don't need to make changes on the hardware BIOS.*** \
-While most of the GPU can be passed with stock vBIOS, some GPU requires vBIOS patching depending on your host distro. \
+***NOTE: You are only making changes on dumped ROM file. Your hardware is safe.*** \
+While most of the GPU can be passed with stock vBIOS, some GPU requires vBIOS patching to passthrough. \
 In order to patch vBIOS, you need to first dump the GPU vBIOS from your system. \
 If you have Windows installed, you can use [GPU-Z](https://www.techpowerup.com/gpuz) to dump vBIOS. \
-To dump vBIOS on Linux, you can use following command (replace PCI id with yours): \
-If it doesn't work on your distro, you can try using live cd.
+To dump vBIOS on Linux, you can use following command (replace PCI id with yours):
 ```sh
 echo 1 > /sys/bus/pci/devices/0000:01:00.0/rom
 cat /sys/bus/pci/devices/0000:01:00.0/rom > path/to/dump/vbios.rom
 echo 0 > /sys/bus/pci/devices/0000:01:00.0/rom
 ```
+If you're not in root shell, you should use the above commands with sudo as:
+```sh
+echo 1 | sudo tee /sys/bus/pci/devices/0000:01:00.0/rom
+sudo cat /sys/bus/pci/devices/0000:01:00.0/rom > path/to/dump/vbios.rom
+echo 0 | sudo tee /sys/bus/pci/devices/0000:01:00.0/rom
+```
 To patch vBIOS, you need to use Hex Editor (eg., [Okteta](https://utils.kde.org/projects/okteta)) and trim unnecessary header. \
 For NVIDIA GPU, using hex editor, search string “VIDEO”, and remove everything before HEX value 55. \
-This is probably the same for AMD device.
+I'm not sure about AMD, but the process should be similar.
 
 To use patched vBIOS, edit VM's configuration to include patched vBIOS inside ***hostdev*** block of VGA
 
