@@ -134,7 +134,7 @@ Now, click on ***Add Hardware***, select ***PCI Devices*** and add the PCI Host 
 Libvirt hooks automate the process of running specific tasks during VM state change. \
 More info at: [PassthroughPost](https://passthroughpo.st/simple-per-vm-libvirt-hooks-with-the-vfio-tools-hook-helper/)
 
-**Note**: Comment Unbind/rebind EFI framebuffer line from start and stop script if you're using AMD 6000 series cards, thanks to [cdgriffith](https://github.com/cdgriffith).
+**Note**: Comment Unbind/rebind EFI framebuffer line from start and stop script if you're using AMD 6000 series cards (https://github.com/QaidVoid/Complete-Single-GPU-Passthrough/issues/9).
 Also, move the line to unload AMD kernal module below detaching devices from host. These might also apply to older AMD cards.
 
 <details>
@@ -190,6 +190,8 @@ fi
   touch /etc/libvirt/hooks/qemu.d/win10/prepare/begin/start.sh
   chmod +x /etc/libvirt/hooks/qemu.d/win10/prepare/begin/start.sh
   ```
+**Note**: If you're on KDE Plasma (Wayland), you need to terminate user services alongside display-manager (https://github.com/QaidVoid/Complete-Single-GPU-Passthrough/issues/31).
+
   <table>
   <tr>
   <th>
@@ -206,6 +208,7 @@ set -x
 
 # Stop display manager
 systemctl stop display-manager
+# systemctl --user -M YOUR_USERNAME@ stop plasma*
       
 # Unbind VTconsoles: might not be needed
 echo 0 > /sys/class/vtconsole/vtcon0/bind
