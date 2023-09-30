@@ -34,9 +34,9 @@ grub-mkconfig -o /boot/grub/grub.cfg
 ### <ins> For systemd-boot user, edit this configuration </ins>
 | /boot/loader/entries/*.conf |
 | ----- |
-| `options root=UUID=...intel_iommu=on iommu=pt.."` |
+| `options root=UUID=...intel_iommu=on iommu=pt..` |
 | OR |
-| `options root=UUID=...amd_iommu=on iommu=pt.."` |
+| `options root=UUID=...amd_iommu=on iommu=pt..` |
 
 Unlike GRUB, systemd-boot doesn't require a separate command to regenerate the configuration. It automatically detects changes
 Reboot your system for the changes to take effect.
