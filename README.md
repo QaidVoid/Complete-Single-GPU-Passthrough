@@ -18,7 +18,8 @@ Disable ***Resizable BAR Support*** in BIOS settings.
 Cards that support Resizable BAR can cause problems with black screens following driver load if Resizable BAR is enabled in UEFI/BIOS. There doesn't seem to be a large performance penalty for disabling it, so turn it off for now until ReBAR support is available for KVM. 
 
 ***Set the kernel paramater depending on your CPU.*** \
-For GRUB user, edit grub configuration.
+
+### <ins> For GRUB user, edit GRUB configuration </ins>
 | /etc/default/grub |
 | ----- |
 | `GRUB_CMDLINE_LINUX_DEFAULT="... intel_iommu=on iommu=pt ..."` |
@@ -29,6 +30,15 @@ For GRUB user, edit grub configuration.
 ```sh
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
+
+### <ins> For systemd-boot user, edit this configuration </ins>
+| /boot/loader/entries/*.conf |
+| ----- |
+| `options root=UUID=...intel_iommu=on iommu=pt.."` |
+| OR |
+| `options root=UUID=...amd_iommu=on iommu=pt.."` |
+
+Unlike GRUB, systemd-boot doesn't require a separate command to regenerate the configuration. It automatically detects changes
 Reboot your system for the changes to take effect.
 
 ***To verify IOMMU, run the following command.***
