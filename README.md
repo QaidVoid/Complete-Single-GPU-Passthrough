@@ -19,7 +19,7 @@ Cards that support Resizable BAR can cause problems with black screens following
 
 ***Set the kernel paramater depending on your CPU.*** \
 
-### <ins> For GRUB user, edit GRUB configuration </ins>
+For GRUB user, edit GRUB configuration
 | /etc/default/grub |
 | ----- |
 | `GRUB_CMDLINE_LINUX_DEFAULT="... intel_iommu=on iommu=pt ..."` |
@@ -31,7 +31,7 @@ Cards that support Resizable BAR can cause problems with black screens following
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
-### <ins> For systemd-boot user, edit this configuration </ins>
+For systemd-boot user, edit this configuration
 | /boot/loader/entries/*.conf |
 | ----- |
 | `options root=UUID=...intel_iommu=on iommu=pt..` |
