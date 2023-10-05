@@ -17,9 +17,12 @@ Enable ***Intel VT-d*** or ***AMD-Vi*** in BIOS settings. If these options are n
 Disable ***Resizable BAR Support*** in BIOS settings. 
 Cards that support Resizable BAR can cause problems with black screens following driver load if Resizable BAR is enabled in UEFI/BIOS. There doesn't seem to be a large performance penalty for disabling it, so turn it off for now until ReBAR support is available for KVM. 
 
-***Set the kernel paramater depending on your CPU.*** \
+***Set the kernel paramater depending on your CPU.***
 
-For GRUB user, edit GRUB configuration
+<details>
+  <summary><b>GRUB</b></summary>
+
+***Edit GRUB configuration***
 | /etc/default/grub |
 | ----- |
 | `GRUB_CMDLINE_LINUX_DEFAULT="... intel_iommu=on iommu=pt ..."` |
@@ -30,15 +33,18 @@ For GRUB user, edit GRUB configuration
 ```sh
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
+</details>
+<details>
+  <summary><b>Systemd Boot</b></summary>
 
-For systemd-boot user, edit this configuration
+***Edit boot entry.***
 | /boot/loader/entries/*.conf |
 | ----- |
 | `options root=UUID=...intel_iommu=on iommu=pt..` |
 | OR |
 | `options root=UUID=...amd_iommu=on iommu=pt..` |
+</details>
 
-Unlike GRUB, systemd-boot doesn't require a separate command to regenerate the configuration. It automatically detects changes
 Reboot your system for the changes to take effect.
 
 ***To verify IOMMU, run the following command.***
@@ -417,9 +423,50 @@ virsh edit win10
 </table>
 
 ### **Audio Passthrough**
-VM's audio can be routed to the host. You need ***Pulseaudio***. It's hit or miss. \
-You can also use [Scream](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Passing_VM_audio_to_host_via_Scream) instead of Pulseaudio. \
-Modify the libvirt configuration of your VM.
+VM's audio can be routed to the host using ***Pipewire*** or ***Pulseaudio***. It's hit or miss. \
+You can also use [Scream](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Passing_VM_audio_to_host_via_Scream) instead.
+
+<details>
+    <summary><b>Pipewire</b></summary>
+
+From [ArchWiki](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Passing_audio_from_virtual_machine_to_host_via_JACK_and_PipeWire)
+
+***Note***: You may use [Calra](https://kx.studio//Applications:Carla) to figure out appropriate input/output. Replace `1000` with your current user id.
+<table>
+<tr>
+<th>
+virsh edit win10
+</th>
+</tr>
+
+<tr>
+<td>
+
+```xml
+...
+  <devices>
+    ...
+    <audio id="1" type="jack">
+      <input clientName="win10" connectPorts="your-input"/>
+      <output clientName="win10" connectPorts="your-output"/>
+    </audio>
+  </devices>
+  <qemu:commandline>
+    <qemu:env name="PIPEWIRE_RUNTIME_DIR" value="/run/user/1000"/>
+    <qemu:env name="PIPEWIRE_LATENCY" value="512/48000"/>
+  </qemu:commandline>
+</domain>
+```
+
+</td>
+</tr>
+</table>
+</details>
+
+<details>
+    <summary><b>Pulseaudio</b></summary>
+
+***Note***: Replace `1000` with your current user id.
 
 <table>
 <tr>
@@ -448,6 +495,8 @@ virsh edit win10
 </td>
 </tr>
 </table>
+</details>
+
 
 ### **Video card driver virtualisation detection**
 Video Card drivers refuse to run in Virtual Machine, so you need to spoof Hyper-V Vendor ID.
