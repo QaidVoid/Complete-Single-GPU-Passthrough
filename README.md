@@ -442,7 +442,7 @@ virsh edit win10
     <qemu:arg value="-audiodev"/>
     <qemu:arg value="pa,id=hda,server=/run/user/1000/pulse/native"/>
   </qemu:commandline>
-</devices>
+</domain>
 ```
 
 </td>
