@@ -423,7 +423,7 @@ virsh edit win10
 </table>
 
 ### **Audio Passthrough**
-VM's audio can be routed to the host using ***Pipewire*** or ***Pulseaudio***. It's hit or miss. \
+VM's audio can be routed to the host using ***Pipewire*** or ***Pulseaudio***. \
 You can also use [Scream](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Passing_VM_audio_to_host_via_Scream) instead.
 
 <details>
@@ -431,7 +431,9 @@ You can also use [Scream](https://wiki.archlinux.org/index.php/PCI_passthrough_v
 
 From [ArchWiki](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Passing_audio_from_virtual_machine_to_host_via_JACK_and_PipeWire)
 
-***Note***: You may use [Calra](https://kx.studio//Applications:Carla) to figure out appropriate input/output. Replace `1000` with your current user id.
+You need to have Pipewire with JACK support.
+
+***Note***: You may use [Carla](https://kx.studio//Applications:Carla) to figure out appropriate input/output. Replace `1000` with your current user id.
 <table>
 <tr>
 <th>
