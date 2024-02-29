@@ -225,7 +225,7 @@ set -x
 # Stop display manager
 systemctl stop display-manager
 # systemctl --user -M YOUR_USERNAME@ stop plasma*
-      
+
 # Unbind VTconsoles: might not be needed
 echo 0 > /sys/class/vtconsole/vtcon0/bind
 echo 0 > /sys/class/vtconsole/vtcon1/bind
