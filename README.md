@@ -1,3 +1,5 @@
+**Note**: I'm currently not using this, so my ability to provide support is limited. If you encounter issues or have questions about the setup, I recommend asking at [r/VFIO](https://reddit.com/r/vfio).
+
 ## **Table Of Contents**
 * **[IOMMU Setup](#enable--verify-iommu)**
 * **[Installing Packages](#install-required-tools)**
